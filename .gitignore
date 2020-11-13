@@ -1,0 +1,10 @@
+node_modules/
+assets/*
+package-lock.json
+build/
+.git/
+.vscode
+.tmp/
+email-list
+.env
+report.txt
