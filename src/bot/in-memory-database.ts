@@ -29,7 +29,8 @@ const create = (
         return phoneRecords;
       },
       getByNumber: (number) => phones.get(number),
-      find: (name) => [...phones.values()].reduce((acc, arr) => acc.concat(arr), []).filter((phone) => phone.name.includes(name)),
+      find: (name) =>
+        [...phones.values()].reduce((acc, arr) => acc.concat(arr), []).filter((phone) => phone.name.includes(name)),
     },
     birthday: {
       all: [...bDays.values()].reduce((acc, arr) => acc.concat(arr), []),
@@ -39,7 +40,8 @@ const create = (
         bDays.set(bDay.date, bDayRecords);
         return bDayRecords;
       },
-      find: (name) => [...bDays.values()].reduce((acc, arr) => acc.concat(arr), []).filter((bDay) => bDay.name.includes(name)),
+      find: (name) =>
+        [...bDays.values()].reduce((acc, arr) => acc.concat(arr), []).filter((bDay) => bDay.name.includes(name)),
       inMonth: (month) => [...bDays.values()].flat().filter((bDay) => new Date(bDay.date).getMonth() === month),
     },
   };

@@ -5,7 +5,7 @@ import { Logger } from 'tslog';
 
 const log = new Logger();
 
-const write = (data: string, path: string) => {
+const write = (data: string, path: string): void => {
   try {
     fs.writeFile(path, data.concat('\n'), { flag: 'a+' }, (error) => {
       if (error) {
@@ -18,7 +18,7 @@ const write = (data: string, path: string) => {
 };
 
 const read = (path: string): Map<string, string> => {
-  let data: Map<string, string> = new Map();
+  const data: Map<string, string> = new Map();
 
   if (fs.existsSync(path)) {
     fs.readFileSync(path)
@@ -28,7 +28,9 @@ const read = (path: string): Map<string, string> => {
       .map((string) => {
         try {
           return JSON.parse(string);
-        } catch {}
+        } catch (error) {
+          log.error(error.message);
+        }
       })
       .filter((x) => x)
       .forEach((piece) => data.set(piece[0], piece));
@@ -36,7 +38,7 @@ const read = (path: string): Map<string, string> => {
   return data;
 };
 
-const writeUser = (userData: TUser) => {
+const writeUser = (userData: TUser): void => {
   try {
     fs.writeFile(constants.USERS_DATA_FILE, JSON.stringify(userData).concat('\n'), { flag: 'a+' }, (error) => {
       if (error) {
@@ -49,7 +51,7 @@ const writeUser = (userData: TUser) => {
 };
 
 const readUsers = (): Map<number, TUser> => {
-  let users: Map<number, TUser> = new Map();
+  const users: Map<number, TUser> = new Map();
 
   if (fs.existsSync(constants.USERS_DATA_FILE)) {
     fs.readFileSync(constants.USERS_DATA_FILE)
@@ -59,7 +61,9 @@ const readUsers = (): Map<number, TUser> => {
       .map((string) => {
         try {
           return JSON.parse(string);
-        } catch {}
+        } catch (error) {
+          log.info(error.message);
+        }
       })
       .filter((x) => x)
       .forEach((user) => users.set(user.id, user));

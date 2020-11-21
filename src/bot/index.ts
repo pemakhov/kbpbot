@@ -129,8 +129,8 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
           validator.hasNormalLength(department),
         ].every((x) => x)
       ) {
-        log.error("Validation error");
-        bot.sendMessage(chatId, "Помилка валідації");
+        log.error('Validation error');
+        bot.sendMessage(chatId, 'Помилка валідації');
         return;
       }
 
