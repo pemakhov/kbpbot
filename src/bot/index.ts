@@ -95,13 +95,6 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
       return;
     }
 
-    const { error } = validator.containsBrackets(msg.text);
-
-    if (error) {
-      log.error(error.message);
-      return;
-    }
-
     const chatId = msg.chat.id;
     const args = msg.text
       ?.trim()
@@ -111,35 +104,60 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     if (!args || args.length < 4 || !['телефон', 'дн'].includes(args[1])) {
       bot.sendMessage(
         chatId,
-        'Додати телефон:\n"/додати телефон 7-11 Лілія Михайлівна (цех 8)"\n\n' +
-          'Додати дату народження:\n"/додати дн 05-11-1982 Сергій Пемахов"'
+        `Використайте наступний шаблон:
+
+Додати телефон:
+/додати телефон 7-11 Лілія Михайлівна (цех 8)
+
+Додати дату народження:
+/додати дн 05-11-1982 Сергій Пемахов`
       );
       return;
     }
+
     if (args[1] === 'телефон') {
-      const phone = args[2];
-      const [name, department] = args.slice(3).join(' ').slice(0, -1).split('(');
+      try {
+        if (!validator.containsBrackets(msg.text)) {
+          log.error('Input must contain brackets');
+          throw Error;
+        }
 
-      if (
-        ![
-          validator.isPhone(phone),
-          validator.isAlphaNumericString(name),
-          validator.isAlphaNumericString(department),
-          validator.hasNormalLength(name),
-          validator.hasNormalLength(department),
-        ].every((x) => x)
-      ) {
-        log.error('Validation error');
-        bot.sendMessage(chatId, 'Помилка валідації');
+        const phone = args[2];
+        const [name, department] = args
+          .slice(3)
+          .join(' ')
+          .slice(0, -1)
+          .split('(')
+          .map((x) => x.trim());
+
+        if (
+          ![
+            validator.isPhone(phone),
+            validator.isAlphaNumericString(name),
+            validator.isAlphaNumericString(department),
+            validator.hasNormalLength(name),
+            validator.hasNormalLength(department),
+          ].every((x) => x)
+        ) {
+          log.error('Validation error');
+          throw Error;
+        }
+
+        const data: TPhone = { number: phone, name, department };
+        inMemoryDb.phone.add(data);
+
+        fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
+        bot.sendMessage(chatId, "it's telephone");
         return;
+      } catch {
+        bot.sendMessage(
+          chatId,
+          `Використайте наступний шаблон:
+
+Додати телефон:
+/додати телефон 7-11 Лілія Михайлівна (цех 8)`
+        );
       }
-
-      const data: TPhone = { number: phone, name, department };
-      inMemoryDb.phone.add(data);
-
-      fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
-      bot.sendMessage(chatId, "it's telephone");
-      return;
     }
 
     if (args[1] === 'дн') {
