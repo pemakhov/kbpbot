@@ -3,14 +3,14 @@ import { Logger } from 'tslog';
 import { UserNotFoundError } from '../errors/UserNotFoundError';
 import { TooManyRequestsError } from '../errors/TooManyRequestsError';
 import rateLimiter from './rate-limiter';
-import { TCustomBot } from '../types/TCustomBot';
 import { TUser } from '../types/TUser';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import fileDb from './file-database';
 import inMemoryDatabase from './in-memory-database';
-import validator from './validation';
+import inputParser from './input-parser';
 import { TPhone } from '../types/TPhone';
 import constants from '../constants';
+import { TBDay } from '../types/TBDay';
 
 const log = new Logger();
 
@@ -89,80 +89,32 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     fileDb.writeUser(user);
   });
 
-  bot.onText(/\/додати/, (msg: TelegramBot.Message) => {
+  const addPhoneText = '/додати телефон';
+  const addBDay = '--додати дн';
+
+  bot.onText(new RegExp(`^${addPhoneText}`), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
     if (!msg.text) {
       log.error('No text');
       return;
     }
 
-    const chatId = msg.chat.id;
-    const args = msg.text
-      ?.trim()
-      .split(' ')
-      .map((x) => x)
-      .map((x) => x.trim());
-    if (!args || args.length < 4 || !['телефон', 'дн'].includes(args[1])) {
-      bot.sendMessage(
-        chatId,
-        `Використайте наступний шаблон:
+    try {
+      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(addPhoneText, ''));
+      inMemoryDb.phone.add(data);
+      log.info(data);
 
-Додати телефон:
-/додати телефон 7-11 Лілія Михайлівна (цех 8)
-
-Додати дату народження:
-/додати дн 05-11-1982 Сергій Пемахов`
-      );
-      return;
-    }
-
-    if (args[1] === 'телефон') {
-      try {
-        if (!validator.containsBrackets(msg.text)) {
-          log.error('Input must contain brackets');
-          throw Error;
-        }
-
-        const phone = args[2];
-        const [name, department] = args
-          .slice(3)
-          .join(' ')
-          .slice(0, -1)
-          .split('(')
-          .map((x) => x.trim());
-
-        if (
-          ![
-            validator.isPhone(phone),
-            validator.isAlphaNumericString(name),
-            validator.isAlphaNumericString(department),
-            validator.hasNormalLength(name),
-            validator.hasNormalLength(department),
-          ].every((x) => x)
-        ) {
-          log.error('Validation error');
-          throw Error;
-        }
-
-        const data: TPhone = { number: phone, name, department };
-        inMemoryDb.phone.add(data);
-
-        fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
-        bot.sendMessage(chatId, "it's telephone");
-        return;
-      } catch {
-        bot.sendMessage(
-          chatId,
-          `Використайте наступний шаблон:
-
-Додати телефон:
-/додати телефон 7-11 Лілія Михайлівна (цех 8)`
-        );
+      fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
+      bot.sendMessage(chatId, "it's telephone");
+    } catch (error) {
+      if (error.name === 'EValidationError') {
+        console.log(error.nativeLanguageMessage);
+        bot.sendMessage(chatId, error.nativeLanguageMessage);
+      } else {
+        bot.sendMessage(chatId, 'Щось пішло не так...');
       }
-    }
-
-    if (args[1] === 'дн') {
-      bot.sendMessage(chatId, "it's bd");
-      return;
+      log.error(error.message);
     }
   });
 
@@ -173,54 +125,15 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
   return bot;
 };
 
-const createCustomBot = (bot: TelegramBot): TCustomBot => {
-  inMemoryDb = inMemoryDatabase.create(fileDb.readUsers());
-
-  return {
-    /**
-     * Sends a message to a user by their telegram name
-     * @param chatId Telegram name of a user
-     * @param text A massage text
-     */
-    sendTextMessage: async (
-      chatId: string,
-      text: string,
-      options: TelegramBot.SendMessageOptions
-    ): Promise<TelegramBot.Message> => {
-      try {
-        const result = await bot.sendMessage(chatId, text, options);
-
-        return result;
-      } catch (error) {
-        log.error(error);
-        return error;
-      }
-    },
-
-    /**
-     * Sends a photo to a user
-     * @param telegramName Telegram name of a user
-     * @param photo A web-link for a photo or a telegram file_id
-     * @param caption A caption for the photo
-     */
-    sendPhoto: async (
-      chatId: string,
-      photo: string,
-      options: TelegramBot.SendPhotoOptions
-    ): Promise<TelegramBot.Message> => {
-      try {
-        const result = await bot.sendPhoto(chatId, photo, options);
-
-        return result;
-      } catch (error) {
-        log.error(error);
-        return error;
-      }
-    },
-  };
+const connectDatabases = async (bot: TelegramBot): Promise<TelegramBot> => {
+  const users = await fileDb.readUsers();
+  const phones = await fileDb.read(constants.PHONES_DATA_FILE, new Map<string, TPhone[]>());
+  const bdays = await fileDb.read(constants.BIRTHS_DATA_FILE, new Map<string, TBDay[]>());
+  inMemoryDb = inMemoryDatabase.create(users, phones, bdays);
+  return bot;
 };
 
 export default {
   joinListeners,
-  createCustomBot,
+  connectDatabases,
 };

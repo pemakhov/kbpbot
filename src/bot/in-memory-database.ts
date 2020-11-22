@@ -23,9 +23,9 @@ const create = (
     phone: {
       all: [...phones.values()].reduce((acc, arr) => acc.concat(arr), []),
       add: (phone) => {
-        const phoneRecords: TPhone[] = phones.get(phone.number) || [];
+        const phoneRecords: TPhone[] = phones.get(phone.phone) || [];
         phoneRecords.push(phone);
-        phones.set(phone.number, phoneRecords);
+        phones.set(phone.phone, phoneRecords);
         return phoneRecords;
       },
       getByNumber: (number) => phones.get(number),

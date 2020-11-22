@@ -2,6 +2,8 @@ import constants from '../constants';
 import fs from 'fs';
 import { TUser } from '../types/TUser';
 import { Logger } from 'tslog';
+import { TPhone } from '../types/TPhone';
+import { TBDay } from '../types/TBDay';
 
 const log = new Logger();
 
@@ -17,9 +19,10 @@ const write = (data: string, path: string): void => {
   }
 };
 
-const read = (path: string): Map<string, string> => {
-  const data: Map<string, string> = new Map();
-
+const read = (
+  path: string,
+  data: Map<string, TPhone[]> | Map<string, TBDay[]>
+): Map<string, TPhone[]> | Map<string, TBDay[]> => {
   if (fs.existsSync(path)) {
     fs.readFileSync(path)
       .toString()
@@ -33,7 +36,10 @@ const read = (path: string): Map<string, string> => {
         }
       })
       .filter((x) => x)
-      .forEach((piece) => data.set(piece[0], piece));
+      .forEach((part) => {
+        const record = data.get(part.phone);
+        record?.push(part);
+      });
   }
   return data;
 };

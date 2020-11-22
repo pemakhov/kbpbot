@@ -2,7 +2,7 @@
  * Type of user data, that will be stored
  */
 export type TPhone = {
-  number: string;
+  phone: string;
   name: string;
-  department: string,
+  department: string;
 };
