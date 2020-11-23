@@ -19,10 +19,29 @@ const write = (data: string, path: string): void => {
   }
 };
 
-const read = (
-  path: string,
-  data: Map<string, TPhone[]> | Map<string, TBDay[]>
-): Map<string, TPhone[]> | Map<string, TBDay[]> => {
+const readPhones = (path: string, data: Map<string, TPhone>): Map<string, TPhone> => {
+  if (fs.existsSync(path)) {
+    fs.readFileSync(path)
+      .toString()
+      .split('\n')
+      .filter((x) => x)
+      .map((string) => {
+        try {
+          return JSON.parse(string);
+        } catch (error) {
+          log.error(error.message);
+        }
+      })
+      .filter((x) => x)
+      .forEach((part: TPhone) => {
+        const key: string = [...Object.values(part)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
+        data.set(key, part);
+      });
+  }
+  return data;
+};
+
+const readBDays = (path: string, data: Map<number, TBDay[]>): Map<number, TBDay[]> => {
   if (fs.existsSync(path)) {
     fs.readFileSync(path)
       .toString()
@@ -37,7 +56,7 @@ const read = (
       })
       .filter((x) => x)
       .forEach((part) => {
-        const record = data.get(part.phone);
+        const record = data.get(part.date);
         record?.push(part);
       });
   }
@@ -78,7 +97,8 @@ const readUsers = (): Map<number, TUser> => {
 };
 
 export default {
-  read,
+  readPhones,
+  readBDays,
   write,
   writeUser,
   readUsers,

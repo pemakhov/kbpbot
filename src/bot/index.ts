@@ -89,10 +89,10 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     fileDb.writeUser(user);
   });
 
-  const addPhoneText = '/додати телефон';
-  const addBDay = '--додати дн';
+  const addPhoneCommand = '/додати телефон';
+  const addBDay = '/додати дн';
 
-  bot.onText(new RegExp(`^${addPhoneText}`), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${addPhoneCommand}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -101,10 +101,9 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
 
     try {
-      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(addPhoneText, ''));
-      inMemoryDb.phone.add(data);
-      log.info(data);
+      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(addPhoneCommand, ''));
 
+      inMemoryDb.phone.add(data);
       fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
       bot.sendMessage(chatId, "it's telephone");
     } catch (error) {
@@ -118,6 +117,29 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
+  const findPhoneCommand = '/телефон';
+
+  bot.onText(new RegExp(`^${findPhoneCommand}`), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    try {
+      const result = inMemoryDb.phone
+        .find(msg.text.replace(findPhoneCommand, '').trim())
+        .reduce((acc, row) => `${acc}${row?.phone} ${row?.name} ${row?.department}\n`, '');
+
+      log.info(result);
+      bot.sendMessage(chatId, result);
+    } catch (error) {
+      bot.sendMessage(chatId, 'Щось пішло не так...');
+      log.error(error.message);
+    }
+  });
+
   bot.onText(/\/test/, (msg: TelegramBot.Message) => {
     console.log(msg);
   });
@@ -125,10 +147,11 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
   return bot;
 };
 
-const connectDatabases = async (bot: TelegramBot): Promise<TelegramBot> => {
-  const users = await fileDb.readUsers();
-  const phones = await fileDb.read(constants.PHONES_DATA_FILE, new Map<string, TPhone[]>());
-  const bdays = await fileDb.read(constants.BIRTHS_DATA_FILE, new Map<string, TBDay[]>());
+const connectDatabases = (bot: TelegramBot): TelegramBot => {
+  const users = fileDb.readUsers();
+  const phones = fileDb.readPhones(constants.PHONES_DATA_FILE, new Map<string, TPhone>());
+  const bdays = fileDb.readBDays(constants.BIRTHS_DATA_FILE, new Map<number, TBDay[]>());
+
   inMemoryDb = inMemoryDatabase.create(users, phones, bdays);
   return bot;
 };

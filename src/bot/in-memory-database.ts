@@ -4,9 +4,9 @@ import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 
 const create = (
-  storedUsers: Map<number, TUser> = new Map(),
-  storedPhones: Map<string, TPhone[]> = new Map(),
-  storedBDays: Map<number, TBDay[]> = new Map()
+  storedUsers: Map<number, TUser> = new Map<number, TUser>(),
+  storedPhones: Map<string, TPhone> = new Map<string, TPhone>(),
+  storedBDays: Map<number, TBDay[]> = new Map<number, TBDay[]>()
 ): TInMemoryDatabase => {
   const users = storedUsers;
   const phones = storedPhones;
@@ -21,16 +21,17 @@ const create = (
       exists: (id) => users.has(id),
     },
     phone: {
-      all: [...phones.values()].reduce((acc, arr) => acc.concat(arr), []),
+      all: [...phones.values()],
       add: (phone) => {
-        const phoneRecords: TPhone[] = phones.get(phone.phone) || [];
-        phoneRecords.push(phone);
-        phones.set(phone.phone, phoneRecords);
-        return phoneRecords;
+        const key = [...Object.values(phone)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
+        phones.set(key, phone);
+        return phone;
       },
-      getByNumber: (number) => phones.get(number),
-      find: (name) =>
-        [...phones.values()].reduce((acc, arr) => acc.concat(arr), []).filter((phone) => phone.name.includes(name)),
+      find: (searchKey) => {
+        console.log('...finding');
+        const summaries = [...phones.keys()].filter((record) => record.includes(searchKey));
+        return summaries.map((key: string) => phones.get(key));
+      },
     },
     birthday: {
       all: [...bDays.values()].reduce((acc, arr) => acc.concat(arr), []),

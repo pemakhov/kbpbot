@@ -12,9 +12,8 @@ export type TInMemoryDatabase = {
   };
   phone: {
     all: TPhone[];
-    add: (phone: TPhone) => TPhone[];
-    getByNumber: (number: string) => TPhone[] | undefined;
-    find: (name: string) => TPhone[] | undefined;
+    add: (phone: TPhone) => TPhone;
+    find: (name: string) => (TPhone | undefined)[];
   };
   birthday: {
     all: TBDay[];
