@@ -6,7 +6,7 @@ import { TBDay } from '../types/TBDay';
 const create = (
   storedUsers: Map<number, TUser> = new Map<number, TUser>(),
   storedPhones: Map<string, TPhone> = new Map<string, TPhone>(),
-  storedBDays: Map<number, TBDay[]> = new Map<number, TBDay[]>()
+  storedBDays: Map<string, TBDay> = new Map<string, TBDay>()
 ): TInMemoryDatabase => {
   const users = storedUsers;
   const phones = storedPhones;
@@ -15,34 +15,46 @@ const create = (
   return {
     users: {
       all: users,
+
       add: (user) => users.set(user.id, user),
+
       getById: (id) => users.get(id),
+
       getByTelegramName: (name) => [...users.values()].find((user) => user.userName === name),
+
       exists: (id) => users.has(id),
     },
     phone: {
       all: [...phones.values()],
+
       add: (phone) => {
         const key = [...Object.values(phone)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
         phones.set(key, phone);
         return phone;
       },
+
       find: (searchKey) => {
-        console.log('...finding');
-        const summaries = [...phones.keys()].filter((record) => record.includes(searchKey));
+        const summaries = [...phones.keys()].filter((record) => record.includes(searchKey.toLowerCase()));
         return summaries.map((key: string) => phones.get(key));
       },
     },
     birthday: {
-      all: [...bDays.values()].reduce((acc, arr) => acc.concat(arr), []),
+      all: [...bDays.values()],
+
       add: (bDay) => {
-        const bDayRecords = bDays.get(bDay.date) || [];
-        bDayRecords.push(bDay);
-        bDays.set(bDay.date, bDayRecords);
-        return bDayRecords;
+        const key = [...Object.values(bDay)]
+          .map((x) => x + '')
+          .reduce((acc, x) => `${acc} ${x}`, '')
+          .toLowerCase();
+        bDays.set(key, bDay);
+        return bDay;
       },
-      find: (name) =>
-        [...bDays.values()].reduce((acc, arr) => acc.concat(arr), []).filter((bDay) => bDay.name.includes(name)),
+
+      find: (name) => {
+        const summaries = [...bDays.keys()].filter((record) => record.includes(name.toLowerCase()));
+        return summaries.map((key: string) => bDays.get(key));
+      },
+
       inMonth: (month) => [...bDays.values()].flat().filter((bDay) => new Date(bDay.date).getMonth() === month),
     },
   };

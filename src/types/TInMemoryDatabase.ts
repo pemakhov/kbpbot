@@ -13,12 +13,12 @@ export type TInMemoryDatabase = {
   phone: {
     all: TPhone[];
     add: (phone: TPhone) => TPhone;
-    find: (name: string) => (TPhone | undefined)[];
+    find: (searchKey: string) => (TPhone | undefined)[];
   };
   birthday: {
     all: TBDay[];
-    add: (bDay: TBDay) => TBDay[];
-    find: (name: string) => TBDay[] | undefined;
-    inMonth: (month: number) => TBDay[] | undefined;
+    add: (bDay: TBDay) => TBDay;
+    find: (name: string) => (TBDay | undefined)[];
+    inMonth: (month: number) => (TBDay | undefined)[];
   };
 };

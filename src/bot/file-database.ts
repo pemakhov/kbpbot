@@ -41,7 +41,7 @@ const readPhones = (path: string, data: Map<string, TPhone>): Map<string, TPhone
   return data;
 };
 
-const readBDays = (path: string, data: Map<number, TBDay[]>): Map<number, TBDay[]> => {
+const readBDays = (path: string, data: Map<string, TBDay>): Map<string, TBDay> => {
   if (fs.existsSync(path)) {
     fs.readFileSync(path)
       .toString()
@@ -55,9 +55,8 @@ const readBDays = (path: string, data: Map<number, TBDay[]>): Map<number, TBDay[
         }
       })
       .filter((x) => x)
-      .forEach((part) => {
-        const record = data.get(part.date);
-        record?.push(part);
+      .forEach((part: TBDay) => {
+        data.set(part.name.toLowerCase(), part);
       });
   }
   return data;

@@ -90,9 +90,8 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
   });
 
   const addPhoneCommand = '/додати телефон';
-  const addBDay = '/додати дн';
 
-  bot.onText(new RegExp(`^${addPhoneCommand}`), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${addPhoneCommand} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -101,7 +100,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
 
     try {
-      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(addPhoneCommand, ''));
+      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(addPhoneCommand, '').trim());
 
       inMemoryDb.phone.add(data);
       fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
@@ -119,7 +118,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 
   const findPhoneCommand = '/телефон';
 
-  bot.onText(new RegExp(`^${findPhoneCommand}`), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${findPhoneCommand} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -132,10 +131,35 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
         .find(msg.text.replace(findPhoneCommand, '').trim())
         .reduce((acc, row) => `${acc}${row?.phone} ${row?.name} ${row?.department}\n`, '');
 
-      log.info(result);
       bot.sendMessage(chatId, result);
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
+      log.error(error.message);
+    }
+  });
+
+  const addBDayCommand = '/додати дн';
+  bot.onText(new RegExp(`^${addBDayCommand} `), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    try {
+      const data: TBDay = inputParser.parseBdInput(msg.text.replace(addBDayCommand, '').trim());
+
+      inMemoryDb.birthday.add(data);
+      fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
+      bot.sendMessage(chatId, 'День народження збережено');
+    } catch (error) {
+      if (error.name === 'EValidationError') {
+        console.log(error.nativeLanguageMessage);
+        bot.sendMessage(chatId, error.nativeLanguageMessage);
+      } else {
+        bot.sendMessage(chatId, 'Щось пішло не так...');
+      }
       log.error(error.message);
     }
   });
@@ -150,7 +174,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 const connectDatabases = (bot: TelegramBot): TelegramBot => {
   const users = fileDb.readUsers();
   const phones = fileDb.readPhones(constants.PHONES_DATA_FILE, new Map<string, TPhone>());
-  const bdays = fileDb.readBDays(constants.BIRTHS_DATA_FILE, new Map<number, TBDay[]>());
+  const bdays = fileDb.readBDays(constants.BIRTHS_DATA_FILE, new Map<string, TBDay>());
 
   inMemoryDb = inMemoryDatabase.create(users, phones, bdays);
   return bot;
