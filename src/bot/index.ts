@@ -11,6 +11,7 @@ import inputParser from './input-parser';
 import { TPhone } from '../types/TPhone';
 import constants from '../constants';
 import { TBDay } from '../types/TBDay';
+import { getRandomResponse } from './text-messages';
 
 const log = new Logger();
 
@@ -174,6 +175,10 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 
   bot.onText(/\/test/, (msg: TelegramBot.Message) => {
     console.log(msg);
+  });
+
+  bot.onText(/^[^/]/, (msg: TelegramBot.Message) => {
+    bot.sendMessage(msg.chat.id, getRandomResponse());
   });
 
   return bot;
