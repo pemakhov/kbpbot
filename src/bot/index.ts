@@ -101,7 +101,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 
       inMemoryDb.phone.add(data);
       fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
-      bot.sendMessage(chatId, "it's telephone");
+      bot.sendMessage(chatId, "Додано");
     } catch (error) {
       if (error.name === 'EValidationError') {
         console.log(error.nativeLanguageMessage);
