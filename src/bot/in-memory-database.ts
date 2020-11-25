@@ -34,7 +34,13 @@ const create = (
       },
 
       find: (searchKey) => {
-        const summaries = [...phones.keys()].filter((record) => record.includes(searchKey.toLowerCase()));
+        const searchFragments = searchKey
+          .toLowerCase()
+          .split(' ')
+          .map((x) => x);
+        const summaries = [...phones.keys()].filter((record) =>
+          searchFragments.every((fragment) => record.includes(fragment))
+        );
         return summaries.map((key: string) => phones.get(key));
       },
     },

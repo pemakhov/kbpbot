@@ -26,13 +26,6 @@ const collectUserData = (msg: TelegramBot.Message): TUser => {
   }
 
   const { id, first_name, last_name = '', username = '', language_code = '' } = msg.from;
-  const token = msg.text?.split(' ')[1];
-
-  if (!token) {
-    throw new Error('No user token');
-  }
-
-  // TODO: provide user token authorization
 
   return {
     id,
@@ -41,7 +34,6 @@ const collectUserData = (msg: TelegramBot.Message): TUser => {
     userName: username.toLowerCase(),
     date: msg.date,
     languageCode: language_code,
-    token,
   };
 };
 
@@ -79,6 +71,11 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 
   // Listens '/start'
   bot.onText(/\/start/, (msg: TelegramBot.Message) => {
+    bot.sendMessage(
+      msg.chat.id,
+      'Наразі ви можете шукати телефони в базі даних за допомогою команди: "/телефон пошуковий запит"'
+    );
+
     if (inMemoryDb.users.exists(msg.chat.id)) {
       return;
     }
@@ -131,7 +128,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
         .find(msg.text.replace(findPhoneCommand, '').trim())
         .reduce((acc, row) => `${acc}${row?.phone} ${row?.name} ${row?.department}\n`, '');
 
-      bot.sendMessage(chatId, result);
+      bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
       log.error(error.message);
@@ -162,6 +159,17 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
       }
       log.error(error.message);
     }
+  });
+
+  bot.onText(/\/help/, (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    bot.sendMessage(chatId, 'Для пошуку телефону введіть команду "/телефон пошуковий запит"');
   });
 
   bot.onText(/\/test/, (msg: TelegramBot.Message) => {

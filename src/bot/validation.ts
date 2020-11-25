@@ -5,7 +5,7 @@ const containsBracketsInTheEnd = (input: string): boolean =>
 
 const isPhone = (input: string): boolean => input.split('-').every((n) => /^\d+$/.test(n));
 
-const isAlphaNumericString = (input: string): boolean => /^[0-9a-zA-Z.\u0400-\u04FF'\s]+$/.test(input);
+const isAlphaNumericString = (input: string): boolean => /^[0-9a-zA-Z.,\u0400-\u04FF'\s]+$/.test(input);
 
 const hasNormalLength = (input: string): boolean => input.length > 2 && input.length < 128;
 

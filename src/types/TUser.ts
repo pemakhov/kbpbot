@@ -8,5 +8,4 @@ export type TUser = {
   userName: string;
   date: number;
   languageCode: string;
-  token: string;
 };
