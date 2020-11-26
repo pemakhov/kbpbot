@@ -56,6 +56,15 @@ export const getTelegramUserId = (telegramName: string): number => {
  * Load bot listeners
  */
 const joinListeners = (bot: TelegramBot): TelegramBot => {
+  const onTextCommands = {
+    start: '/start',
+    addPhone: '/додати телефон',
+    findPhone: '/телефон',
+    addBD: '/додати дн',
+    help: '/help',
+    test: '/test',
+  };
+
   bot.on('message', (msg: TelegramBot.Message) => {
     log.info(msg);
     const userId: number = msg.chat.id;
@@ -68,10 +77,15 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     } catch (error) {
       log.error(error.message);
     }
+
+    if (Object.values(onTextCommands).some((name) => msg.text?.startsWith(name))) {
+      return;
+    }
+    bot.sendMessage(msg.chat.id, getRandomResponse());
   });
 
   // Listens '/start'
-  bot.onText(/\/start/, (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${onTextCommands.start}`), (msg: TelegramBot.Message) => {
     bot.sendMessage(
       msg.chat.id,
       'Наразі ви можете шукати телефони в базі даних за допомогою команди: "/телефон пошуковий запит"'
@@ -87,9 +101,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     fileDb.writeUser(user);
   });
 
-  const addPhoneCommand = '/додати телефон';
-
-  bot.onText(new RegExp(`^${addPhoneCommand} `), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${onTextCommands.addPhone} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -98,11 +110,11 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
 
     try {
-      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(addPhoneCommand, '').trim());
+      const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(onTextCommands.addPhone, '').trim());
 
       inMemoryDb.phone.add(data);
       fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
-      bot.sendMessage(chatId, "Додано");
+      bot.sendMessage(chatId, 'Додано');
     } catch (error) {
       if (error.name === 'EValidationError') {
         console.log(error.nativeLanguageMessage);
@@ -114,9 +126,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
-  const findPhoneCommand = '/телефон';
-
-  bot.onText(new RegExp(`^${findPhoneCommand} `), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${onTextCommands.findPhone} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -126,7 +136,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 
     try {
       const result = inMemoryDb.phone
-        .find(msg.text.replace(findPhoneCommand, '').trim())
+        .find(msg.text.replace(onTextCommands.findPhone, '').trim())
         .reduce((acc, row) => `${acc}${row?.phone} ${row?.name} ${row?.department}\n`, '');
 
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
@@ -136,8 +146,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
-  const addBDayCommand = '/додати дн';
-  bot.onText(new RegExp(`^${addBDayCommand} `), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${onTextCommands.addBD} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -146,7 +155,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
 
     try {
-      const data: TBDay = inputParser.parseBdInput(msg.text.replace(addBDayCommand, '').trim());
+      const data: TBDay = inputParser.parseBdInput(msg.text.replace(onTextCommands.addBD, '').trim());
 
       inMemoryDb.birthday.add(data);
       fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
@@ -162,7 +171,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
-  bot.onText(/\/help/, (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${onTextCommands.help}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -173,12 +182,8 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     bot.sendMessage(chatId, 'Для пошуку телефону введіть команду "/телефон пошуковий запит"');
   });
 
-  bot.onText(/\/test/, (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${onTextCommands.test}`), (msg: TelegramBot.Message) => {
     console.log(msg);
-  });
-
-  bot.onText(/^[^/]/, (msg: TelegramBot.Message) => {
-    bot.sendMessage(msg.chat.id, getRandomResponse());
   });
 
   return bot;
