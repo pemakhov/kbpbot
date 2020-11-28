@@ -78,7 +78,9 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
       log.error(error.message);
     }
 
-    if (Object.values(onTextCommands).some((name) => msg.text?.startsWith(name))) {
+    const messageText = msg.text;
+
+    if (Object.values(onTextCommands).some((name) => messageText?.toLowerCase().startsWith(name))) {
       return;
     }
     bot.sendMessage(msg.chat.id, getRandomResponse());
@@ -136,7 +138,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 
     try {
       const result = inMemoryDb.phone
-        .find(msg.text.replace(onTextCommands.findPhone, '').trim())
+        .find(msg.text.toLowerCase().replace(onTextCommands.findPhone, '').trim())
         .reduce((acc, row) => `${acc}${row?.phone} ${row?.name} ${row?.department}\n`, '');
 
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
