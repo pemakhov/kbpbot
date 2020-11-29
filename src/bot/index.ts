@@ -60,11 +60,16 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     start: '/start',
     addPhone: '/додати телефон',
     findPhone: '/телефон',
-    addBD: '/додати дн',
+    allPhones: '/телефонна книга',
+    addBd: '/додати дн',
+    findBd: '/дн',
+    allBd: '/всі дн',
+    restBd: '/решта дн',
     help: '/help',
     test: '/test',
   };
 
+  // On every message
   bot.on('message', (msg: TelegramBot.Message) => {
     log.info(msg);
     const userId: number = msg.chat.id;
@@ -86,7 +91,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     bot.sendMessage(msg.chat.id, getRandomResponse());
   });
 
-  // Listens '/start'
+  // On '/start'
   bot.onText(new RegExp(`^${onTextCommands.start}`), (msg: TelegramBot.Message) => {
     bot.sendMessage(
       msg.chat.id,
@@ -103,6 +108,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     fileDb.writeUser(user);
   });
 
+  // Add phone
   bot.onText(new RegExp(`^${onTextCommands.addPhone} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -128,6 +134,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
+  // Find phone
   bot.onText(new RegExp(`^${onTextCommands.findPhone} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -139,7 +146,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     try {
       const result = inMemoryDb.phone
         .find(msg.text.toLowerCase().replace(onTextCommands.findPhone, '').trim())
-        .reduce((acc, row) => `${acc}${row?.phone} ${row?.name} ${row?.department}\n`, '');
+        .reduce((acc, row) => `${acc}${row?.phone} · ${row?.department} · ${row?.name}\n`, '');
 
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
@@ -148,7 +155,8 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
-  bot.onText(new RegExp(`^${onTextCommands.addBD} `), (msg: TelegramBot.Message) => {
+  // Find all phones
+  bot.onText(new RegExp(`^${onTextCommands.allPhones}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -157,7 +165,28 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
 
     try {
-      const data: TBDay = inputParser.parseBdInput(msg.text.replace(onTextCommands.addBD, '').trim());
+      const result = inMemoryDb.phone
+        .all()
+        .reduce((acc, row) => `${acc}${row?.phone} · ${row?.department} · ${row?.name}\n`, '');
+
+      bot.sendMessage(chatId, result);
+    } catch (error) {
+      bot.sendMessage(chatId, 'Щось пішло не так...');
+      log.error(error.message);
+    }
+  });
+
+  // Add birthday date
+  bot.onText(new RegExp(`^${onTextCommands.addBd} `), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    try {
+      const data: TBDay = inputParser.parseBdInput(msg.text.replace(onTextCommands.addBd, '').trim());
 
       inMemoryDb.birthday.add(data);
       fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
@@ -173,6 +202,89 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     }
   });
 
+  const monthsUkrAccusative = [
+    'січня',
+    'лютого',
+    'березня',
+    'квітня',
+    'травня',
+    'червня',
+    'липня',
+    'серпня',
+    'вересня',
+    'жовтня',
+    'листопада',
+    'грудня',
+  ];
+
+  // Find birthday
+  bot.onText(new RegExp(`^${onTextCommands.findBd} `), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    try {
+      const result = inMemoryDb.birthday
+        .find(msg.text.toLowerCase().replace(onTextCommands.findBd, '').trim())
+        .reduce((acc, row) => `${acc}${row?.day} ${monthsUkrAccusative[(row?.month || 12) - 1]}, ${row?.name}\n`, '');
+
+      bot.sendMessage(chatId, result || 'Нічого не знайдено');
+    } catch (error) {
+      bot.sendMessage(chatId, 'Щось пішло не так...');
+      log.error(error.message);
+    }
+  });
+
+  // All birthdays
+  bot.onText(new RegExp(`^${onTextCommands.allBd}`), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    try {
+      const result = inMemoryDb.birthday
+        .all()
+        .sort((a, b) => a.month - b.month || a.day - b.day)
+        .reduce((acc, row) => `${acc}${row?.day} ${monthsUkrAccusative[(row?.month || 12) - 1]}, ${row?.name}\n`, '');
+
+      bot.sendMessage(chatId, result);
+    } catch (error) {
+      bot.sendMessage(chatId, 'Щось пішло не так...');
+      log.error(error.message);
+    }
+  });
+
+  // Rest birthdays
+  bot.onText(new RegExp(`^${onTextCommands.restBd}`), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+
+    try {
+      const today = new Date();
+      const result = inMemoryDb.birthday
+        .all()
+        .filter((a) => a.month > today.getMonth() + 1 && a.day >= today.getDay())
+        .sort((a, b) => a.month - b.month || a.day - b.day)
+        .reduce((acc, row) => `${acc}${row?.day} ${monthsUkrAccusative[(row?.month || 12) - 1]}, ${row?.name}\n`, '');
+
+      bot.sendMessage(chatId, result);
+    } catch (error) {
+      bot.sendMessage(chatId, 'Щось пішло не так...');
+      log.error(error.message);
+    }
+  });
+
+  // Help
   bot.onText(new RegExp(`^${onTextCommands.help}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -181,7 +293,13 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
       return;
     }
 
-    bot.sendMessage(chatId, 'Для пошуку телефону введіть команду "/телефон пошуковий запит"');
+    bot.sendMessage(
+      chatId,
+      '/телефон пошуковий запит - знайти [пошуковий запит] в телефонній книзі\n\n' +
+        '/телефонна книга - список всіх телефонів\n\n' +
+        '/дн пошуковий запит - знайти дні народження для [пошуковий запит]\n\n' +
+        '/решта дн - список днів народження, що залишилися до кінця року'
+    );
   });
 
   bot.onText(new RegExp(`^${onTextCommands.test}`), (msg: TelegramBot.Message) => {
@@ -194,9 +312,9 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
 const connectDatabases = (bot: TelegramBot): TelegramBot => {
   const users = fileDb.readUsers();
   const phones = fileDb.readPhones(constants.PHONES_DATA_FILE, new Map<string, TPhone>());
-  const bdays = fileDb.readBDays(constants.BIRTHS_DATA_FILE, new Map<string, TBDay>());
+  const bDays = fileDb.readBDays(constants.BIRTHS_DATA_FILE, new Map<string, TBDay>());
 
-  inMemoryDb = inMemoryDatabase.create(users, phones, bdays);
+  inMemoryDb = inMemoryDatabase.create(users, phones, bDays);
   return bot;
 };
 

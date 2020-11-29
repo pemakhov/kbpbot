@@ -13,7 +13,7 @@ const hasNormalLength = (input: string): boolean => input.length > 2 && input.le
 
 const containsMoreThanTwoSpaceSeparatedArgs = (input: string): boolean => input.split(' ').length > 1;
 
-const isDotSeparatedDayMonthYearDate = (input: string): boolean => /^\d{1,2}d{1,2}d{4}$/.test(input);
+const isDotSeparatedDayMonthYearDate = (input: string): boolean => /^\d{1,2}.\d{1,2}.\d{4}$/.test(input);
 
 const check = (testResult: boolean, errorMessage: string, nativeLanguageErrorMessage: string): boolean | never => {
   if (testResult) {

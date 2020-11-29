@@ -25,7 +25,7 @@ const create = (
       exists: (id) => users.has(id),
     },
     phone: {
-      all: [...phones.values()],
+      all: () => [...phones.values()],
 
       add: (phone) => {
         const key = [...Object.values(phone)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
@@ -41,11 +41,15 @@ const create = (
         const summaries = [...phones.keys()].filter((record) =>
           searchFragments.every((fragment) => record.includes(fragment))
         );
-        return summaries.map((key: string) => phones.get(key));
+        return summaries
+          .map((key: string) => phones.get(key))
+          .sort(
+            (a, b) => a?.department.localeCompare(b?.department || '') || a?.name.localeCompare(b?.name || '') || 0
+          );
       },
     },
     birthday: {
-      all: [...bDays.values()],
+      all: () => [...bDays.values()],
 
       add: (bDay) => {
         const key = [...Object.values(bDay)]
@@ -56,8 +60,14 @@ const create = (
         return bDay;
       },
 
-      find: (name) => {
-        const summaries = [...bDays.keys()].filter((record) => record.includes(name.toLowerCase()));
+      find: (searchKey) => {
+        const searchFragments = searchKey
+          .toLowerCase()
+          .split(' ')
+          .map((x) => x);
+        const summaries = [...bDays.keys()].filter((record) =>
+          searchFragments.every((fragment) => record.includes(fragment))
+        );
         return summaries.map((key: string) => bDays.get(key));
       },
 

@@ -26,7 +26,7 @@ const constants = {
 
   PHONES_DATA_FILE: `${__dirname}/../assets/phones.json`,
 
-  BIRTHS_DATA_FILE: `${__dirname}/../assets/phones.json`,
+  BIRTHS_DATA_FILE: `${__dirname}/../assets/birthdays.json`,
 };
 
 export default constants;
