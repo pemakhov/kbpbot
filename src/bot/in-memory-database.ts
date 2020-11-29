@@ -25,7 +25,10 @@ const create = (
       exists: (id) => users.has(id),
     },
     phone: {
-      all: () => [...phones.values()],
+      all: () =>
+        [...phones.values()].sort(
+          (a, b) => a?.department.localeCompare(b?.department || '') || a?.name.localeCompare(b?.name || '') || 0
+        ),
 
       add: (phone) => {
         const key = [...Object.values(phone)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
