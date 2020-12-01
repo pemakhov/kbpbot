@@ -1,5 +1,4 @@
 node_modules/
-assets/*
 package-lock.json
 build/
 .git/
