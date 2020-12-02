@@ -273,7 +273,10 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
       const today = new Date();
       const result = inMemoryDb.birthday
         .all()
-        .filter((a) => a.month > today.getMonth() + 1 && a.day >= today.getDay())
+        .filter((a) => {
+          const currentMonth = today.getMonth() + 1;
+          return a.month > currentMonth || (a.month === currentMonth && a.day >= today.getDay());
+        })
         .sort((a, b) => a.month - b.month || a.day - b.day)
         .reduce((acc, row) => `${acc}${row?.day} ${monthsUkrAccusative[(row?.month || 12) - 1]}, ${row?.name}\n`, '');
 
@@ -296,10 +299,10 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     bot.sendMessage(
       chatId,
       '/телефон пошуковий запит - знайти [пошуковий запит] в телефонній книзі\n\n' +
-        '/телефонна книга - список всіх телефонів\n\n' +
-        '/дн пошуковий запит - знайти дні народження для [пошуковий запит]\n\n' +
-        '/всі дн - список всіх днів народження\n\n' +
-        '/решта дн - список днів народження, що залишилися до кінця року'
+      '/телефонна книга - список всіх телефонів\n\n' +
+      '/дн пошуковий запит - знайти дні народження для [пошуковий запит]\n\n' +
+      '/всі дн - список всіх днів народження\n\n' +
+      '/решта дн - список днів народження, що залишилися до кінця року'
     );
   });
 
