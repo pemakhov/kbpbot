@@ -13,5 +13,5 @@ if (!constants.TELEGRAM_TOKEN) {
   process.exit(1);
 }
 
-telegramBot.connectDatabases(telegramBot.joinListeners(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true })));
+telegramBot.joinListeners(telegramBot.connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true })));
 log.info('Telegram bot has started');
