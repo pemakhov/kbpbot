@@ -74,7 +74,7 @@ const help = (bot: TelegramBot, command: string): TelegramBot => {
 
 const onMessage = (bot: TelegramBot, commands: TCommands): TelegramBot => {
   bot.on('message', (msg: TelegramBot.Message) => {
-    log.info(msg);
+    // log.info(msg);
     const userId: number = msg.chat.id;
     const messageTimestamp: number = msg.date;
 
