@@ -59,11 +59,11 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
   // birthday listeners
   listeners.addBd(bot, commands.addBd, inMemoryDb);
 
-  listeners.findBd(bot, commands.addBd, inMemoryDb);
+  listeners.findBd(bot, commands.findBd, inMemoryDb);
 
-  listeners.getAllBd(bot, commands.addBd, inMemoryDb);
+  listeners.getAllBd(bot, commands.allBd, inMemoryDb);
 
-  listeners.restBd(bot, commands.addBd, inMemoryDb);
+  listeners.restBd(bot, commands.restBd, inMemoryDb);
 
   bot.onText(new RegExp(`^${commands.test}`), (msg: TelegramBot.Message) => {
     console.log(msg);
