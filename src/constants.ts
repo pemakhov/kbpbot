@@ -10,14 +10,14 @@ const constants = {
   USER_TOKEN_SECRET: process.env.USER_TOKEN_SECRET,
 
   /**
-   * The port, api will be running on
-   */
-  PORT: process.env.PORT || 3000,
-
-  /**
    * Allowed number of requests to API per minute
    */
   USER_REQUESTS_PER_MINUTE_LIMIT: +(process.env.REQUESTS_PER_MINUTE_LIMIT || '') || 30,
+
+  /**
+   * Telegram ID of the admin, who will be receive messages like statistics and changed database files
+   */
+  ADMIN_TELEGRAM_ID: process.env.ADMIN_TELEGRAM_ID || 0,
 
   /**
    * Path to the user database file

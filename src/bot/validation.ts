@@ -7,8 +7,6 @@ const isPhone = (input: string): boolean => input.split('-').every((n) => /^\d+$
 
 const isAlphaNumericString = (input: string): boolean => /^[0-9a-zA-Z.,\u0400-\u04FF'\s]+$/.test(input);
 
-const isAlphaNumericSpaceFreeString = (input: string): boolean => /^[0-9a-zA-Z.,\u0400-\u04FF']+$/.test(input);
-
 const hasNormalLength = (input: string): boolean => input.length > 2 && input.length < 128;
 
 const containsMoreThanTwoSpaceSeparatedArgs = (input: string): boolean => input.split(' ').length > 1;
@@ -27,7 +25,6 @@ export default {
   containsBracketsInTheEnd,
   isPhone,
   isAlphaNumericString,
-  isAlphaNumericSpaceFreeString,
   hasNormalLength,
   containsMoreThanTwoSpaceSeparatedArgs,
   isDotSeparatedDayMonthYearDate,

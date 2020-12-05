@@ -14,6 +14,4 @@ COPY ./package-lock.json ./package-lock.json
 
 RUN npm install
 
-EXPOSE 5000
-
 CMD ["node", "build/index"]

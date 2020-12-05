@@ -35,9 +35,9 @@ const parsePhoneInput = (input: string): TPhone | never => {
   validator.check(validator.hasNormalLength(name), 'Name is too short or too long', "Ім'я задовге або закоротке");
 
   validator.check(
-    validator.isAlphaNumericSpaceFreeString(department),
+    validator.isAlphaNumericString(department),
     "Department name can contain only numbers, letters of Latin and Ukrainian alphabet and ' symbol. Spaces are forbidden.",
-    'Назва відділу може містити лише цифри, букви латинської та української абетки та апостроф. Без пробілів.'
+    'Назва відділу може містити лише цифри, букви латинської та української абетки та апостроф.'
   );
 
   validator.check(

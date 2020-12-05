@@ -45,6 +45,7 @@ const start = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
 
     inMemoryDb.users.add(user);
     fileDb.writeUser(user);
+    bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.USERS_DATA_FILE);
     bot.sendMessage(msg.chat.id, 'Відправте команду "/help", щоб побачити список інших доступних команд.');
   });
 
@@ -111,6 +112,7 @@ const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
       inMemoryDb.phone.add(data);
       fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
       bot.sendMessage(chatId, 'Додано');
+      bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.PHONES_DATA_FILE);
     } catch (error) {
       if (error.name === 'EValidationError') {
         console.log(error.nativeLanguageMessage);
@@ -185,6 +187,7 @@ const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
       inMemoryDb.birthday.add(data);
       fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
       bot.sendMessage(chatId, 'День народження збережено');
+      bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.BIRTHS_DATA_FILE);
     } catch (error) {
       if (error.name === 'EValidationError') {
         console.log(error.nativeLanguageMessage);
