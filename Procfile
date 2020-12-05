@@ -1,1 +1,1 @@
-web: micro-bot -p $PORT
+web: npm run start
