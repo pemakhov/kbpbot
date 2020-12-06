@@ -1,7 +1,7 @@
 {
   "name": "kbp_bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "A telegram bot, serving as a phone and birthdays book",
   "main": "index.js",
   "scripts": {
     "build": "rimraf ./build && tsc",
@@ -18,8 +18,12 @@
     }
   },
   "keywords": [],
-  "author": "",
+  "author": "Serhii Pemakhov",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pemakhov/kbpbot.git"
+  },
   "devDependencies": {
     "@types/express-rate-limit": "^5.1.0",
     "@types/node": "^14.11.1",
