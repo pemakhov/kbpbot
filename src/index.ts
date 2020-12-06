@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import http from 'http';
 dotenv.config();
 
 import constants from './constants';
@@ -15,3 +16,6 @@ if (!constants.TELEGRAM_TOKEN) {
 
 telegramBot.joinListeners(telegramBot.connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true })));
 log.info('Telegram bot has started');
+
+// This server does nothing but is needed for heroku hosting
+http.createServer().listen(process.env.PORT || 5000);
