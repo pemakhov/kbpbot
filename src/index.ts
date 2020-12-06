@@ -18,4 +18,4 @@ telegramBot.joinListeners(telegramBot.connectDatabases(new TelegramBot(constants
 log.info('Telegram bot has started');
 
 // This server does nothing but is needed for heroku hosting
-http.createServer().listen(process.env.PORT || 5000);
+http.createServer((req, res) => res.writeHead(200).end('OK')).listen(process.env.PORT || 5000);
