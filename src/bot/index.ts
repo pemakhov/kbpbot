@@ -38,6 +38,7 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
     findBd: '/дн',
     allBd: '/всі дн',
     restBd: '/решта дн',
+    claim: '/побажання',
     help: '/help',
     test: '/test',
   };
@@ -48,6 +49,8 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
   listeners.help(bot, commands.help);
 
   listeners.onMessage(bot, commands);
+
+  listeners.onClaim(bot, commands.claim);
 
   // phone listeners
   listeners.addPhone(bot, commands.addPhone, inMemoryDb);

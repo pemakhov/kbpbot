@@ -7,6 +7,7 @@ export type TCommands = {
   findBd: string;
   allBd: string;
   restBd: string;
+  claim: string;
   help: string;
   test: string;
 };

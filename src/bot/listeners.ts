@@ -99,6 +99,25 @@ const onMessage = (bot: TelegramBot, commands: TCommands): TelegramBot => {
   return bot;
 };
 
+const onClaim = (bot: TelegramBot, command: string): TelegramBot => {
+  bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
+    const chatId = msg.chat.id;
+
+    if (!msg.text) {
+      log.error('No text');
+      return;
+    }
+    const claimFrom = `${msg.from?.first_name} ${msg.from?.last_name ? msg.from.last_name + ' ' : ''}(${
+      msg.from?.username
+    }) пише:\n`;
+    const claim = msg.text.toLowerCase().replace(command, '').trim();
+
+    bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `${claimFrom}${claim}`);
+    bot.sendMessage(chatId, 'Відправлено');
+  });
+  return bot;
+};
+
 const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
   bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
@@ -298,6 +317,7 @@ export default {
   start,
   help,
   onMessage,
+  onClaim,
   addPhone,
   findPhone,
   getAllPhones,
