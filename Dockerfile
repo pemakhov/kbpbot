@@ -6,7 +6,7 @@ COPY ./build/ ./build
 
 COPY ./assets/ ./assets
 
-COPY ./.env ./.env
+COPY ./.env-prod ./.env
 
 COPY ./package.json ./package.json
 

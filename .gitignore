@@ -6,4 +6,5 @@ build/
 .tmp/
 email-list
 .env
+.env-prod
 report.txt
