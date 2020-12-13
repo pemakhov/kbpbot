@@ -36,15 +36,15 @@ const start = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
     };
   };
 
-  bot.onText(new RegExp(`^${command}`), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${command}`), async (msg: TelegramBot.Message) => {
     if (inMemoryDb.users.exists(msg.chat.id)) {
       return;
     }
 
     const user = collectUserData(msg);
 
+    await fileDb.writeUser(user);
     inMemoryDb.users.add(user);
-    fileDb.writeUser(user);
     bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.USERS_DATA_FILE);
     bot.sendMessage(msg.chat.id, 'Відправте команду "/help", щоб побачити список інших доступних команд.');
   });
@@ -120,7 +120,7 @@ const onClaim = (bot: TelegramBot, command: string): TelegramBot => {
 };
 
 const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
-  bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${command} `), async (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -131,10 +131,10 @@ const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
     try {
       const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(command, '').trim());
 
+      await fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
       inMemoryDb.phone.add(data);
-      fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
-      bot.sendMessage(chatId, 'Додано');
       bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.PHONES_DATA_FILE);
+      bot.sendMessage(chatId, 'Додано');
     } catch (error) {
       if (error.name === 'EValidationError') {
         console.log(error.nativeLanguageMessage);
@@ -195,7 +195,7 @@ const getAllPhones = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDa
 };
 
 const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
-  bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
+  bot.onText(new RegExp(`^${command} `), async (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
@@ -206,10 +206,10 @@ const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
     try {
       const data: TBDay = inputParser.parseBdInput(msg.text.replace(command, '').trim());
 
+      await fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
       inMemoryDb.birthday.add(data);
-      fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
-      bot.sendMessage(chatId, 'День народження збережено');
       bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.BIRTHS_DATA_FILE);
+      bot.sendMessage(chatId, 'День народження збережено');
     } catch (error) {
       if (error.name === 'EValidationError') {
         console.log(error.nativeLanguageMessage);

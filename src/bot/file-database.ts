@@ -7,9 +7,9 @@ import { TBDay } from '../types/TBDay';
 
 const log = new Logger();
 
-const write = (data: string, path: string): void => {
+const write = async (data: string, path: string): Promise<void> => {
   try {
-    fs.writeFile(path, data.concat('\n'), { flag: 'a+' }, (error) => {
+    await fs.writeFile(path, data.concat('\n'), { flag: 'a+' }, (error) => {
       if (error) {
         throw new Error('Failed to data into the file');
       }
@@ -62,9 +62,9 @@ const readBDays = (path: string, data: Map<string, TBDay>): Map<string, TBDay> =
   return data;
 };
 
-const writeUser = (userData: TUser): void => {
+const writeUser = async (userData: TUser): Promise<void> => {
   try {
-    fs.writeFile(constants.USERS_DATA_FILE, JSON.stringify(userData).concat('\n'), { flag: 'a+' }, (error) => {
+    await fs.writeFile(constants.USERS_DATA_FILE, JSON.stringify(userData).concat('\n'), { flag: 'a+' }, (error) => {
       if (error) {
         throw new Error('Failed to write user data');
       }
