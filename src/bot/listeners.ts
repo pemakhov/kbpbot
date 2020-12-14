@@ -46,6 +46,7 @@ const start = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
     await fileDb.writeUser(user);
     inMemoryDb.users.add(user);
     bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.USERS_DATA_FILE);
+    bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new user has joined:\n${JSON.stringify(user)}`);
     bot.sendMessage(msg.chat.id, 'Відправте команду "/help", щоб побачити список інших доступних команд.');
   });
 
@@ -134,6 +135,7 @@ const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
       await fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
       inMemoryDb.phone.add(data);
       bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.PHONES_DATA_FILE);
+      bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new phone has been added:\n${JSON.stringify(data)}`);
       bot.sendMessage(chatId, 'Додано');
     } catch (error) {
       if (error.name === 'EValidationError') {
@@ -209,6 +211,7 @@ const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
       await fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
       inMemoryDb.birthday.add(data);
       bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.BIRTHS_DATA_FILE);
+      bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new birth date has been added:\n${JSON.stringify(data)}`);
       bot.sendMessage(chatId, 'День народження збережено');
     } catch (error) {
       if (error.name === 'EValidationError') {

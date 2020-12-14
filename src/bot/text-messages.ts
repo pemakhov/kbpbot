@@ -16,6 +16,7 @@ const funnyResponses: string[] = [
   'Ми вам пєрєзвонім',
   'На проблємку напали...',
   'Вот ето поворот...',
+  'Самсінг вент вронг...'
 ];
 
 const getRandomNumberInRange = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min;
