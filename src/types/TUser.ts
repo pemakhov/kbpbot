@@ -3,8 +3,9 @@
  */
 export type TUser = {
   id: number;
+  isAdmin: boolean;
   firstName: string;
-  lastName: string,
+  lastName: string;
   userName: string;
   date: number;
   languageCode: string;

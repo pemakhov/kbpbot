@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
-import express from 'express';
-import { router } from './server/router';
 
 dotenv.config();
 
+import express from 'express';
+import { router } from './server/router';
 import constants from './constants';
 import telegramBot from './bot';
 import TelegramBot from 'node-telegram-bot-api';

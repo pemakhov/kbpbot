@@ -11,5 +11,5 @@
   "rules": {
     "prettier/prettier": 2
   },
-  "ignorePatterns": ["node_modules/*", "assets/*", "build/*"]
+  "ignorePatterns": ["node_modules/*", "assets/*", "build/*", "test/*.js"]
 }
