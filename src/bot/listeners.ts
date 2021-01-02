@@ -9,33 +9,34 @@ import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import { getRandomResponse } from './text-messages';
-import fileDb from './file-database';
 import inputParser from './input-parser';
+import redisDb from './redis-db';
 
 const log = new Logger();
 
-const start = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
-  /**
-   * Collects user data that will be stored
-   * @param msg
-   */
-  const collectUserData = (msg: TelegramBot.Message): TUser => {
-    if (!msg.from) {
-      throw new Error('Anonymous input');
-    }
+/**
+ * Collects user data from a message
+ * @param msg
+ */
+const collectUserData = (msg: TelegramBot.Message): TUser => {
+  if (!msg.from) {
+    throw new Error('Anonymous input');
+  }
 
-    const { id, first_name, last_name = '', username = '', language_code = '' } = msg.from;
+  const { id, first_name, last_name = '', username = '', language_code = '' } = msg.from;
 
-    return {
-      id,
-      firstName: first_name,
-      lastName: last_name,
-      userName: username.toLowerCase(),
-      date: msg.date,
-      languageCode: language_code,
-    };
+  return {
+    id,
+    isAdmin: false,
+    firstName: first_name,
+    lastName: last_name,
+    userName: username.toLowerCase(),
+    date: msg.date,
+    languageCode: language_code,
   };
+};
 
+function start(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command}`), async (msg: TelegramBot.Message) => {
     if (inMemoryDb.users.exists(msg.chat.id)) {
       return;
@@ -43,17 +44,16 @@ const start = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
 
     const user = collectUserData(msg);
 
-    await fileDb.writeUser(user);
+    redisDb.saveUser(user);
     inMemoryDb.users.add(user);
-    bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.USERS_DATA_FILE);
     bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new user has joined:\n${JSON.stringify(user)}`);
     bot.sendMessage(msg.chat.id, 'Відправте команду "/help", щоб побачити список інших доступних команд.');
   });
 
   return bot;
-};
+}
 
-const help = (bot: TelegramBot, command: string): TelegramBot => {
+function help(bot: TelegramBot, command: string): TelegramBot {
   bot.onText(new RegExp(`^${command}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -75,9 +75,9 @@ const help = (bot: TelegramBot, command: string): TelegramBot => {
     );
   });
   return bot;
-};
+}
 
-const onMessage = (bot: TelegramBot, commands: TCommands): TelegramBot => {
+function onMessage(bot: TelegramBot, commands: TCommands): TelegramBot {
   bot.on('message', (msg: TelegramBot.Message) => {
     log.info(msg);
     const userId: number = msg.chat.id;
@@ -91,17 +91,17 @@ const onMessage = (bot: TelegramBot, commands: TCommands): TelegramBot => {
       log.error(error.message);
     }
 
-    const messageText = msg.text;
+    const messageText = msg.text?.toLowerCase();
 
-    if (Object.values(commands).some((name) => messageText?.toLowerCase().startsWith(name))) {
+    if (Object.values(commands).some((name) => messageText?.startsWith(name))) {
       return;
     }
     bot.sendMessage(msg.chat.id, getRandomResponse());
   });
   return bot;
-};
+}
 
-const onClaim = (bot: TelegramBot, command: string): TelegramBot => {
+function onClaim(bot: TelegramBot, command: string): TelegramBot {
   bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -118,9 +118,9 @@ const onClaim = (bot: TelegramBot, command: string): TelegramBot => {
     bot.sendMessage(chatId, 'Відправлено');
   });
   return bot;
-};
+}
 
-const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function addPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command} `), async (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -132,9 +132,8 @@ const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
     try {
       const data: TPhone = inputParser.parsePhoneInput(msg.text.replace(command, '').trim());
 
-      await fileDb.write(JSON.stringify(data), constants.PHONES_DATA_FILE);
+      await redisDb.savePhone(data);
       inMemoryDb.phone.add(data);
-      bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.PHONES_DATA_FILE);
       bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new phone has been added:\n${JSON.stringify(data)}`);
       bot.sendMessage(chatId, 'Додано');
     } catch (error) {
@@ -148,9 +147,9 @@ const addPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
     }
   });
   return bot;
-};
+}
 
-const findPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function findPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -171,9 +170,9 @@ const findPhone = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatab
     }
   });
   return bot;
-};
+}
 
-const getAllPhones = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function getAllPhones(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -187,16 +186,16 @@ const getAllPhones = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDa
         .all()
         .reduce((acc, row) => `${acc}${row?.phone} · ${row?.department} · ${row?.name}\n`, '');
 
-      bot.sendMessage(chatId, result);
+      bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
       log.error(error.message);
     }
   });
   return bot;
-};
+}
 
-const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function addBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command} `), async (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -208,7 +207,7 @@ const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
     try {
       const data: TBDay = inputParser.parseBdInput(msg.text.replace(command, '').trim());
 
-      await fileDb.write(JSON.stringify(data), constants.BIRTHS_DATA_FILE);
+      await redisDb.saveBirthday(data);
       inMemoryDb.birthday.add(data);
       bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.BIRTHS_DATA_FILE);
       bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new birth date has been added:\n${JSON.stringify(data)}`);
@@ -224,7 +223,7 @@ const addBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
     }
   });
   return bot;
-};
+}
 
 const monthsUkrAccusative = [
   'січня',
@@ -241,7 +240,7 @@ const monthsUkrAccusative = [
   'грудня',
 ];
 
-const findBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function findBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -262,9 +261,9 @@ const findBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
     }
   });
   return bot;
-};
+}
 
-const getAllBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function getAllBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -279,16 +278,16 @@ const getAllBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
         .sort((a, b) => a.month - b.month || a.day - b.day)
         .reduce((acc, row) => `${acc}${row?.day} ${monthsUkrAccusative[(row?.month || 12) - 1]}, ${row?.name}\n`, '');
 
-      bot.sendMessage(chatId, result);
+      bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
       log.error(error.message);
     }
   });
   return bot;
-};
+}
 
-const restBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+function restBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command}`), (msg: TelegramBot.Message) => {
     const chatId = msg.chat.id;
 
@@ -315,7 +314,7 @@ const restBd = (bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
     }
   });
   return bot;
-};
+}
 
 export default {
   start,

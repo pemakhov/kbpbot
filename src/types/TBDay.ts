@@ -2,7 +2,7 @@
  * Type of user data, that will be stored
  */
 export type TBDay = {
-  id: number;
+  id: string;
   date: string;
   day: number;
   month: number;

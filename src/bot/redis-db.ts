@@ -2,133 +2,123 @@ import redis from 'redis';
 import { TBDay } from '../types/TBDay';
 import { TPhone } from '../types/TPhone';
 import { TUser } from '../types/TUser';
+import { promisify } from 'util';
 
 const client = redis.createClient();
+
+const hsetAsync = promisify(client.HSET).bind(client);
+const hgetAsync = promisify(client.HGET).bind(client);
+const hgetallAsync = promisify(client.HGETALL).bind(client);
 
 client.on('error', (error) => {
   console.error(error);
 });
 
-/* Common methods */
+/* User manipulating methods */
 
-/**
- * Parses data objects an array of stringified objects
- * @param data array of stringified objects
- * @returns the array of objects
- */
-const parseData = (data: string[]): unknown[] => {
-  const users: unknown[] = [];
-  data
-    .map((row) => row)
-    .map((row) => JSON.parse(row))
-    .map((x) => x)
-    .forEach((user) => users.push(user));
-  return users as TUser[];
+const saveUser = (user: TUser): Promise<number> => hsetAsync(['users', user.id.toString(), JSON.stringify(user)]);
+
+const getUserById = async (id: number): Promise<TUser | null> => {
+  const result = await hgetAsync('users', id + '');
+
+  return result ? JSON.parse(result) : null;
 };
 
-/**
- * Gets object from redis hash by hash name and id
- * @param hashName hash key name, for example 'users'
- * @param id data id
- */
-const getOneById = async (hashName: string, id: number): Promise<unknown | null> => {
-  return new Promise((resolve, reject) => {
-    client.HGET(hashName, id.toString(), async function (error, result) {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(JSON.parse(result));
-    });
-  });
+const makeUserAdmin = async (id: number): Promise<boolean> => {
+  const user = await getUserById(id);
+
+  if (!user) {
+    console.error('User not found');
+    return false;
+  }
+  user.isAdmin = true;
+  const userSaved = await saveUser(user);
+
+  if (userSaved === 1 || userSaved === 0) {
+    return true;
+  }
+
+  console.error('User is not saved');
+  return false;
 };
 
-/**
- * Gets all objects from redis hash by hash name
- * @param hashName hash key name, for example 'users'
- * @param dataTypeParser a function parsing array of strings into an array of needed type objects
- */
-const getAll = async (hashName: string, dataTypeParser: (data: string[]) => unknown[]): Promise<unknown[]> => {
-  return new Promise((resolve, reject) => {
-    client.HGETALL(hashName, (error, result) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(dataTypeParser(Object.values(result)));
-    });
-  });
+const getUsers = async (): Promise<TUser[]> => {
+  const result = await hgetallAsync('users');
+
+  return result ? Object.values(result).map((user) => JSON.parse(user as string)) : [];
 };
 
-/**
- * Deletes object from redis hash by hash name and id
- * @param hashName hash key name, for example 'users'
- * @param id data id
- */
-const deleteOneById = async (hashName: string, id: number): Promise<number> => {
+const deleteUserById = async (id: number): Promise<number> => {
   return new Promise((resolve, reject) => {
-    client.HDEL(hashName, id.toString(), (error, result) => {
+    client.HDEL('users', id + '', (error, result) => {
       if (error) {
         reject(error);
         return;
       }
       resolve(result);
+      return;
     });
   });
 };
 
-/* User manipulating methods */
-
-const saveUser = async (user: TUser): Promise<boolean> =>
-  client.HSET('users', user.id.toString(), JSON.stringify(user));
-
-const getUserById = async (id: number): Promise<TUser | null> => getOneById('users', id) as Promise<TUser | null>;
-
-const makeUserAdmin = async (id: number): Promise<boolean> => {
-  try {
-    const user = await getUserById(id);
-
-    if (!user) {
-      throw new Error(`User not found`);
-    }
-    user.isAdmin = true;
-    return saveUser(user);
-  } catch (error) {
-    return false;
-  }
-};
-
-const parseUsers = (data: string[]): TUser[] => parseData(data) as TUser[];
-
-const getUsers = async (): Promise<TUser[]> => getAll('users', parseUsers) as Promise<TUser[]>;
-
-const deleteUserById = async (id: number): Promise<number> => deleteOneById('users', id);
-
 /* Phone manipulating methods */
 
-const parsePhones = (data: string[]): TPhone[] => parseData(data) as TPhone[];
+const savePhone = async (phone: TPhone): Promise<number> => hsetAsync(['phones', phone.id, JSON.stringify(phone)]);
 
-const savePhone = async (phone: TPhone): Promise<boolean> =>
-  client.HSET('phones', phone.id.toString(), JSON.stringify(phone));
+const getPhoneById = async (id: string): Promise<TPhone | null> => {
+  const result = await hgetAsync('phones', id);
 
-const getPhoneById = (id: number): Promise<TPhone | null> => getOneById('phones', id) as Promise<TPhone | null>;
+  return result ? JSON.parse(result) : null;
+};
 
-const getPhones = (): Promise<TPhone[]> => getAll('phones', parsePhones) as Promise<TPhone[]>;
+const getPhones = async (): Promise<TPhone[]> => {
+  const result = await hgetallAsync('phones');
 
-const deletePhoneById = async (id: number): Promise<number> => deleteOneById('phones', id);
+  return result ? Object.values(result).map((phone) => JSON.parse(phone as string)) : [];
+};
+
+const deletePhoneById = async (id: string): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    client.HDEL('phones', id, (error, result) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(result);
+      return;
+    });
+  });
+};
 
 /* Birthday manipulating methods */
 
-const parseBirthdays = (data: string[]): TPhone[] => parseData(data) as TPhone[];
+const saveBirthday = async (bDay: TBDay): Promise<number> => hsetAsync(['birthdays', bDay.id, JSON.stringify(bDay)]);
 
-const saveBirthday = async (bDay: TBDay): Promise<boolean> =>
-  client.HSET('birthdays', bDay.id.toString(), JSON.stringify(bDay));
+const getBirthdayById = async (id: string): Promise<TBDay | null> => {
+  const result = await hgetAsync('birthdays', id);
 
-const getBirthdayById = (id: number): Promise<TBDay | null> => getOneById('birthdays', id) as Promise<TBDay | null>;
+  return result ? JSON.parse(result) : null;
+};
 
-const getBirthdays = (): Promise<TBDay[]> => getAll('birthdays', parseBirthdays) as Promise<TBDay[]>;
+const getBirthdays = async (): Promise<TBDay[]> => {
+  const result = await hgetallAsync('birthdays');
 
-const deleteBirthdayById = async (id: number): Promise<number> => deleteOneById('birthdays', id);
+  return result ? Object.values(result).map((bDay) => JSON.parse(bDay as string)) : [];
+};
+
+const deleteBirthdayById = async (id: string): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    client.HDEL('birthdays', id, (error, result) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(result);
+      return;
+    });
+  });
+};
+
 
 export default {
   saveUser,

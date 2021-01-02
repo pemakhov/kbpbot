@@ -3,14 +3,44 @@ import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 
-const create = (
-  storedUsers: Map<number, TUser> = new Map<number, TUser>(),
-  storedPhones: Map<string, TPhone> = new Map<string, TPhone>(),
-  storedBDays: Map<string, TBDay> = new Map<string, TBDay>()
-): TInMemoryDatabase => {
-  const users = storedUsers;
-  const phones = storedPhones;
-  const bDays = storedBDays;
+const getPhoneKey = (obj: TPhone): string => {
+  const parts: string[] = [obj.phone, obj.name, obj.department.replace(/\s/g, '')];
+  return parts.map((x) => x.toLowerCase()).reduce((acc, x) => acc + x, '');
+};
+
+const getBirthdayKey = (obj: TBDay): string => {
+  const localMonths = [
+    'січень',
+    'лютий',
+    'березень',
+    'квітень',
+    'травень',
+    'червень',
+    'липень',
+    'серпень',
+    'вересень',
+    'жовтень',
+    'листопад',
+    'грудень',
+  ];
+
+  const localDaysOfWeek = ['понеділок', 'вівторок', 'середа', 'четвер', "п'ятниця", 'субота', 'неділя'];
+
+  return `${obj.name} ${obj.name} ${obj.year} ${localMonths[obj.month + 1]} ${localDaysOfWeek[obj.day]}`;
+};
+
+function createInMemoryDb(
+  storedUsers: TUser[] = [],
+  storedPhones: TPhone[] = [],
+  storedBDays: TBDay[] = []
+): TInMemoryDatabase {
+  const users: Map<number, TUser> = new Map();
+  const phones: Map<string, TPhone> = new Map();
+  const bDays: Map<string, TBDay> = new Map();
+
+  storedUsers.map((user) => users.set(user.id, user));
+  storedPhones.map((phone) => phones.set(getPhoneKey(phone), phone));
+  storedBDays.map((bDay) => bDays.set(getBirthdayKey(bDay), bDay));
 
   return {
     users: {
@@ -31,7 +61,10 @@ const create = (
         ),
 
       add: (phone) => {
-        const key = [...Object.values(phone)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
+        const key: string = [...Object.values(phone)]
+          .map((x) => x + '')
+          .reduce((acc, x) => `${acc} ${x}`, '')
+          .toLowerCase();
         phones.set(key, phone);
         return phone;
       },
@@ -77,8 +110,8 @@ const create = (
       inMonth: (month) => [...bDays.values()].flat().filter((bDay) => new Date(bDay.date).getMonth() === month),
     },
   };
-};
+}
 
 export default {
-  create,
+  createInMemoryDb,
 };

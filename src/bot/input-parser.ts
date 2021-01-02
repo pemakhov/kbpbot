@@ -9,13 +9,7 @@ const parsePhoneInput = (input: string): TPhone | never => {
     'Команда повинна містити назву відділу у дужках в кінці'
   );
 
-  const args = input
-    ?.trim()
-    .split(' ')
-    .map((x) => x)
-    .map((x) => x.trim());
-
-  const phone = args[0];
+  const phone = input.trim().slice(0, 4);
 
   validator.check(validator.isPhone(phone), 'Wrong phone format', 'Неправильний формат номера телефону');
 
@@ -45,8 +39,9 @@ const parsePhoneInput = (input: string): TPhone | never => {
     'Department name is too short or too long',
     'Назва відділу задовга або закоротка'
   );
+  console.log({ id: `${phone}${name}`, phone, name, department });
 
-  return { phone, name, department };
+  return { id: `${phone}${name}`, phone, name, department };
 };
 
 const parseBdInput = (input: string): TBDay | never => {
@@ -79,8 +74,8 @@ const parseBdInput = (input: string): TBDay | never => {
   );
 
   const [day, month, year] = dateInput.split('.').map((x) => parseInt(x));
-  const date = new Date(`${year}-${month}-${day}`);
-  return { date, day, month, year, name };
+  const date = `${year}-${month}-${day}`;
+  return { id: `${date}${name}`, date, day, month, year, name };
 };
 
 export default {

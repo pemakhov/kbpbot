@@ -1,9 +1,29 @@
-import constants from '../constants';
+import constants from '../src/constants';
 import fs from 'fs';
-import { TUser } from '../types/TUser';
 import { Logger } from 'tslog';
-import { TPhone } from '../types/TPhone';
-import { TBDay } from '../types/TBDay';
+
+type TOldUser = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  date: number;
+  languageCode: string;
+};
+
+type TOldPhone = {
+  phone: string;
+  name: string;
+  department: string;
+};
+
+export type TOldBDay = {
+  date: string;
+  day: number;
+  month: number;
+  year: number;
+  name: string;
+};
 
 const log = new Logger();
 
@@ -19,7 +39,7 @@ const write = async (data: string, path: string): Promise<void> => {
   }
 };
 
-const readPhones = (path: string, data: Map<string, TPhone>): Map<string, TPhone> => {
+const readPhones = (path: string, data: Map<string, TOldPhone>): Map<string, TOldPhone> => {
   if (fs.existsSync(path)) {
     fs.readFileSync(path)
       .toString()
@@ -33,15 +53,18 @@ const readPhones = (path: string, data: Map<string, TPhone>): Map<string, TPhone
         }
       })
       .filter((x) => x)
-      .forEach((part: TPhone) => {
-        const key: string = [...Object.values(part)].reduce((acc, x) => `${acc} ${x}`, '').toLowerCase();
+      .forEach((part: TOldPhone) => {
+        const key: string = [...Object.values(part)]
+          .map((x) => x + '')
+          .reduce((acc, x) => `${acc} ${x}`, '')
+          .toLowerCase();
         data.set(key, part);
       });
   }
   return data;
 };
 
-const readBDays = (path: string, data: Map<string, TBDay>): Map<string, TBDay> => {
+const readBDays = (path: string, data: Map<string, TOldBDay>): Map<string, TOldBDay> => {
   if (fs.existsSync(path)) {
     fs.readFileSync(path)
       .toString()
@@ -55,14 +78,14 @@ const readBDays = (path: string, data: Map<string, TBDay>): Map<string, TBDay> =
         }
       })
       .filter((x) => x)
-      .forEach((part: TBDay) => {
+      .forEach((part: TOldBDay) => {
         data.set(part.name.toLowerCase(), part);
       });
   }
   return data;
 };
 
-const writeUser = async (userData: TUser): Promise<void> => {
+const writeUser = async (userData: TOldUser): Promise<void> => {
   try {
     await fs.writeFile(constants.USERS_DATA_FILE, JSON.stringify(userData).concat('\n'), { flag: 'a+' }, (error) => {
       if (error) {
@@ -74,8 +97,8 @@ const writeUser = async (userData: TUser): Promise<void> => {
   }
 };
 
-const readUsers = (): Map<number, TUser> => {
-  const users: Map<number, TUser> = new Map();
+const readUsers = (): Map<number, TOldUser> => {
+  const users = new Map();
 
   if (fs.existsSync(constants.USERS_DATA_FILE)) {
     fs.readFileSync(constants.USERS_DATA_FILE)

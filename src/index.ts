@@ -16,7 +16,12 @@ if (!constants.TELEGRAM_TOKEN) {
   process.exit(1);
 }
 
-telegramBot.joinListeners(telegramBot.connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true })));
+// telegramBot.joinListeners(telegramBot.connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true })));
+
+telegramBot
+  .connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true }))
+  .then((bot) => telegramBot.joinListeners(bot));
+
 log.info('Telegram bot has started');
 
 // This server does nothing but is needed for heroku hosting

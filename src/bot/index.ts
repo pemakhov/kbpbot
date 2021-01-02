@@ -1,13 +1,10 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { UserNotFoundError } from '../errors/UserNotFoundError';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
-import fileDb from './file-database';
 import inMemoryDatabase from './in-memory-database';
-import { TPhone } from '../types/TPhone';
-import constants from '../constants';
-import { TBDay } from '../types/TBDay';
 import { TCommands } from '../types/TCommands';
 import listeners from './listeners';
+import redisDb from './redis-db';
 
 let inMemoryDb: TInMemoryDatabase;
 
@@ -75,12 +72,12 @@ const joinListeners = (bot: TelegramBot): TelegramBot => {
   return bot;
 };
 
-const connectDatabases = (bot: TelegramBot): TelegramBot => {
-  const users = fileDb.readUsers();
-  const phones = fileDb.readPhones(constants.PHONES_DATA_FILE, new Map<string, TPhone>());
-  const bDays = fileDb.readBDays(constants.BIRTHS_DATA_FILE, new Map<string, TBDay>());
+const connectDatabases = async (bot: TelegramBot): Promise<TelegramBot> => {
+  const users = await redisDb.getUsers();
+  const phones = await redisDb.getPhones();
+  const bDays = await redisDb.getBirthdays();
 
-  inMemoryDb = inMemoryDatabase.create(users, phones, bDays);
+  inMemoryDb = inMemoryDatabase.createInMemoryDb(users, phones, bDays);
   return bot;
 };
 
