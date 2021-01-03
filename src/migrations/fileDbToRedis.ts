@@ -5,8 +5,8 @@ import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 import redisDb from '../bot/redis-db';
 
-const PHONES_PATH = path.join(__dirname, '../assets/phones.json');
-const BIRTHDAYS_PATH = path.join(__dirname, '../assets/birthdays.json');
+const PHONES_PATH = path.join(__dirname, '../../assets/phones.json');
+const BIRTHDAYS_PATH = path.join(__dirname, '../../assets/birthdays.json');
 
 const users: TUser[] = [...fileDb.readUsers().values()].map((user) => ({
   id: user.id,
