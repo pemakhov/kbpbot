@@ -87,3 +87,5 @@ savePhonesPromise
 saveBirthdaysPromise
   .then((result) => console.log(`Saved ${result} birthdays of ${bDays.length}`))
   .catch((error) => console.log(error.message));
+
+Promise.all([saveUsersPromise, savePhonesPromise, saveBirthdaysPromise]).then(() => process.exit());
