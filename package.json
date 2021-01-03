@@ -7,7 +7,7 @@
     "build": "rimraf ./build && tsc",
     "start:dev": "nodemon src/index.ts --ignore assets/",
     "start": "npm run build && node build/index.js",
-    "test": "mocha --exit -r ts-node/register 'tests/**/*.ts' || true"
+    "test": "mocha --exit -r ts-node/register 'src/tests/**/*.ts' || true"
   },
   "husky": {
     "hooks": {

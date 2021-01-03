@@ -1,9 +1,9 @@
 import fileDb from './file-database';
 import path from 'path';
-import { TUser } from '../src/types/TUser';
-import { TPhone } from '../src/types/TPhone';
-import { TBDay } from '../src/types/TBDay';
-import redisDb from '../src/bot/redis-db';
+import { TUser } from '../types/TUser';
+import { TPhone } from '../types/TPhone';
+import { TBDay } from '../types/TBDay';
+import redisDb from '../bot/redis-db';
 
 const PHONES_PATH = path.join(__dirname, '../assets/phones.json');
 const BIRTHDAYS_PATH = path.join(__dirname, '../assets/birthdays.json');

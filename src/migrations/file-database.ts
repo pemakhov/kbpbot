@@ -1,4 +1,4 @@
-import constants from '../src/constants';
+import constants from '../constants';
 import fs from 'fs';
 import { Logger } from 'tslog';
 

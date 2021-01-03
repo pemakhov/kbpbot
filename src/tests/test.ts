@@ -1,9 +1,9 @@
 import 'mocha';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { TUser } from '../src/types/TUser';
-import redisDb from '../src/bot/redis-db';
-import { TPhone } from '../src/types/TPhone';
+import { TUser } from '../types/TUser';
+import redisDb from '../bot/redis-db';
+import { TPhone } from '../types/TPhone';
 
 chai.use(chaiAsPromised);
 
