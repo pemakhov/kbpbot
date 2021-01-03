@@ -24,9 +24,7 @@ const getBirthdayKey = (obj: TBDay): string => {
     'грудень',
   ];
 
-  const localDaysOfWeek = ['понеділок', 'вівторок', 'середа', 'четвер', "п'ятниця", 'субота', 'неділя'];
-
-  return `${obj.name} ${obj.name} ${obj.year} ${localMonths[obj.month + 1]} ${localDaysOfWeek[obj.day]}`;
+  return `${obj.name} ${obj.year} ${localMonths[obj.month + 1]}`.toLowerCase();
 };
 
 function createInMemoryDb(
@@ -61,11 +59,7 @@ function createInMemoryDb(
         ),
 
       add: (phone) => {
-        const key: string = [...Object.values(phone)]
-          .map((x) => x + '')
-          .reduce((acc, x) => `${acc} ${x}`, '')
-          .toLowerCase();
-        phones.set(key, phone);
+        phones.set(getPhoneKey(phone), phone);
         return phone;
       },
 
@@ -88,11 +82,7 @@ function createInMemoryDb(
       all: () => [...bDays.values()],
 
       add: (bDay) => {
-        const key = [...Object.values(bDay)]
-          .map((x) => x + '')
-          .reduce((acc, x) => `${acc} ${x}`, '')
-          .toLowerCase();
-        bDays.set(key, bDay);
+        bDays.set(getBirthdayKey(bDay), bDay);
         return bDay;
       },
 
@@ -101,9 +91,11 @@ function createInMemoryDb(
           .toLowerCase()
           .split(' ')
           .map((x) => x);
-        const summaries = [...bDays.keys()].filter((record) =>
-          searchFragments.every((fragment) => record.includes(fragment))
-        );
+        const summaries = [...bDays.keys()]
+          .map((key) => {
+            return key;
+          })
+          .filter((record) => searchFragments.every((fragment) => record.includes(fragment)));
         return summaries.map((key: string) => bDays.get(key));
       },
 
