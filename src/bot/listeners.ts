@@ -10,7 +10,7 @@ import { TBDay } from '../types/TBDay';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import { getRandomResponse } from './text-messages';
 import inputParser from './input-parser';
-import redisDb from './redis-db';
+import redisDb from '../data-manager/redis-db';
 
 const log = new Logger();
 
@@ -301,7 +301,7 @@ function restBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
       const result = inMemoryDb.birthday
         .all()
         .filter((a) => {
-          const currentMonth = today.getMonth() + 1;
+          const currentMonth = today.getMonth();
           return a.month > currentMonth || (a.month === currentMonth && a.day >= today.getDay());
         })
         .sort((a, b) => a.month - b.month || a.day - b.day)

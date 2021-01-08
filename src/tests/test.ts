@@ -2,7 +2,7 @@ import 'mocha';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { TUser } from '../types/TUser';
-import redisDb from '../bot/redis-db';
+import redisDb from '../data-manager/redis-db';
 import { TPhone } from '../types/TPhone';
 
 chai.use(chaiAsPromised);
@@ -32,7 +32,7 @@ const testBirthday = {
   id: Number.MAX_SAFE_INTEGER.toString(),
   date: new Date(1982, 5, 21).toString(),
   day: 21,
-  month: 5,
+  month: 2,
   year: 1982,
   name: 'Test Name',
 };

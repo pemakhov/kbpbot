@@ -2,6 +2,7 @@ import { TUser } from '../types/TUser';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
+import redisDb from './redis-db';
 
 const getPhoneKey = (obj: TPhone): string => {
   const parts: string[] = [obj.phone, obj.name, obj.department.replace(/\s/g, '')];
@@ -27,11 +28,7 @@ const getBirthdayKey = (obj: TBDay): string => {
   return `${obj.name} ${obj.year} ${localMonths[obj.month + 1]}`.toLowerCase();
 };
 
-function createInMemoryDb(
-  storedUsers: TUser[] = [],
-  storedPhones: TPhone[] = [],
-  storedBDays: TBDay[] = []
-): TInMemoryDatabase {
+function create(storedUsers: TUser[] = [], storedPhones: TPhone[] = [], storedBDays: TBDay[] = []): TInMemoryDatabase {
   const users: Map<number, TUser> = new Map();
   const phones: Map<string, TPhone> = new Map();
   const bDays: Map<string, TBDay> = new Map();
@@ -104,6 +101,14 @@ function createInMemoryDb(
   };
 }
 
+async function init(): Promise<TInMemoryDatabase> {
+  const users = await redisDb.getUsers();
+  const phones = await redisDb.getPhones();
+  const bDays = await redisDb.getBirthdays();
+
+  return create(users, phones, bDays);
+}
+
 export default {
-  createInMemoryDb,
+  init,
 };

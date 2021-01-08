@@ -3,31 +3,21 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
-import { router } from './server/router';
 import constants from './constants';
-import telegramBot from './bot';
-import TelegramBot from 'node-telegram-bot-api';
-import { Logger } from 'tslog';
-
-const log = new Logger();
+import myTelegramBot from './bot';
+import telegramBotAPI from 'node-telegram-bot-api';
+import inMemoryDatabase from './data-manager/in-memory-database';
+import api from './api/server';
 
 if (!constants.TELEGRAM_TOKEN) {
-  log.fatal('Please, provide a telegram bot token in the environment');
+  console.error('Please, provide a telegram bot token in the environment');
   process.exit(1);
 }
 
-// telegramBot.joinListeners(telegramBot.connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true })));
+const bot = new telegramBotAPI(constants.TELEGRAM_TOKEN, { polling: true });
 
-telegramBot
-  .connectDatabases(new TelegramBot(constants.TELEGRAM_TOKEN, { polling: true }))
-  .then((bot) => telegramBot.joinListeners(bot));
+inMemoryDatabase.init().then((db) => myTelegramBot.init(bot, db));
 
-log.info('Telegram bot has started');
-
-// This server does nothing but is needed for heroku hosting
+// api
 const app = express();
-app.use(router);
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Listening to the port ${PORT}`);
-});
+api.init(app);

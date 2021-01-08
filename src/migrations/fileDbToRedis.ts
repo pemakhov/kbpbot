@@ -3,7 +3,7 @@ import path from 'path';
 import { TUser } from '../types/TUser';
 import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
-import redisDb from '../bot/redis-db';
+import redisDb from '../data-manager/redis-db';
 
 const PHONES_PATH = path.join(__dirname, '../../assets/phones.json');
 const BIRTHDAYS_PATH = path.join(__dirname, '../../assets/birthdays.json');
