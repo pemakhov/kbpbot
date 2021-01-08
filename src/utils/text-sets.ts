@@ -1,4 +1,4 @@
-const funnyResponses: string[] = [
+export const funnyResponses: string[] = [
   'Шо за діч?',
   'Мені за цю розробку премію не дадуть',
   'Я вам оставляю желать лучшего',
@@ -16,11 +16,20 @@ const funnyResponses: string[] = [
   'Ми вам пєрєзвонім',
   'На проблємку напали...',
   'Вот ето поворот...',
-  'Самсінг вент вронг...'
+  'Самсінг вент вронг...',
 ];
 
-const getRandomNumberInRange = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min;
-
-const getRandomString = (strings: string[]): string => strings[getRandomNumberInRange(0, strings.length - 1)];
-
-export const getRandomResponse = (): string => getRandomString(funnyResponses);
+export const monthsUkrAccusative = [
+  'січня',
+  'лютого',
+  'березня',
+  'квітня',
+  'травня',
+  'червня',
+  'липня',
+  'серпня',
+  'вересня',
+  'жовтня',
+  'листопада',
+  'грудня',
+];

@@ -8,7 +8,8 @@ import { TUser } from '../types/TUser';
 import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
-import { getRandomResponse } from './text-messages';
+import { getRandomResponse } from '../utils/random-responder';
+import { monthsUkrAccusative } from '../utils/text-sets';
 import inputParser from './input-parser';
 import redisDb from '../data-manager/redis-db';
 
@@ -224,21 +225,6 @@ function addBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
   });
   return bot;
 }
-
-const monthsUkrAccusative = [
-  'січня',
-  'лютого',
-  'березня',
-  'квітня',
-  'травня',
-  'червня',
-  'липня',
-  'серпня',
-  'вересня',
-  'жовтня',
-  'листопада',
-  'грудня',
-];
 
 function findBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase): TelegramBot {
   bot.onText(new RegExp(`^${command} `), (msg: TelegramBot.Message) => {
