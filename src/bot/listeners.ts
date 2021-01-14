@@ -2,7 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { Logger } from 'tslog';
 import constants from '../constants';
 import rateLimiter from './rate-limiter';
-import { TooManyRequestsError } from '../errors/TooManyRequestsError';
+import { TooManyRequestsError } from './errors/TooManyRequestsError';
 import { TCommands } from '../types/TCommands';
 import { TUser } from '../types/TUser';
 import { TPhone } from '../types/TPhone';

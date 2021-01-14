@@ -119,7 +119,6 @@ const deleteBirthdayById = async (id: string): Promise<number> => {
   });
 };
 
-
 export default {
   saveUser,
   getUserById,

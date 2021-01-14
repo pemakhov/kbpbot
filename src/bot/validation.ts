@@ -1,4 +1,4 @@
-import { ValidationError } from '../errors/ValidationError';
+import { ValidationError } from './errors/ValidationError';
 
 const containsBracketsInTheEnd = (input: string): boolean =>
   input.split('(').map((x) => x).length === 2 && input.trim().slice(-1) === ')';

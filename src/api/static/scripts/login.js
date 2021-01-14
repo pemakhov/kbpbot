@@ -6,10 +6,16 @@ function handleInputNameForm(event) {
     inputNameForm === null || inputNameForm === void 0 ? void 0 : inputNameForm.classList.add('hide');
     var nameInput = document.getElementById('#login-stage-1__name-input');
     var username = nameInput.value;
-    var request = new XMLHttpRequest();
-    request.open('POST', 'code-request', true);
-    request.setRequestHeader('Content-Type', 'application/json');
-    request.send(JSON.stringify({ username: username }));
+    var url = 'code-request';
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username })
+    })
+        .then(function (response) { return response.json(); })
+        .then(function (data) { return console.log(data); });
 }
 function handleInputCodeForm(event) {
     event.preventDefault();

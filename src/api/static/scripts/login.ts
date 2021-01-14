@@ -7,13 +7,18 @@ function handleInputNameForm(event: Event) {
   inputNameForm?.classList.add('hide');
 
   const nameInput = <HTMLInputElement>document.getElementById('#login-stage-1__name-input');
-
   const username = nameInput.value;
+  const url = 'code-request';
 
-  const request = new XMLHttpRequest();
-  request.open('POST', 'code-request', true);
-  request.setRequestHeader('Content-Type', 'application/json');
-  request.send(JSON.stringify({ username }));
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username }),
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
 }
 
 function handleInputCodeForm(event: Event) {

@@ -1,6 +1,7 @@
 import { Application } from 'express';
-import middleware from './middleware';
-import router from './router';
+import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
+import middleware from './config/middleware';
+import router from './config/router';
 
 function init(app: Application): void {
   const PORT = process.env.PORT || 5000;

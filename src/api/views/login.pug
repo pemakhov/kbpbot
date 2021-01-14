@@ -1,0 +1,25 @@
+extends layouts/main-layout.pug
+
+block main
+  main
+    .container
+      h3 Увійдіть
+      form#login-stage-1.col.s12
+        .row
+          .input-field.col.s6
+            input(type="text", name="username", id="#login-stage-1__name-input", class="active")
+            label(for="username") Введіть свій телеграм юзернейм (без @)
+            span.helper-text Увійти можуть лише акаунти, що мають телеграм-юзернейм та роль адміністратора
+        .row
+          .input-field.col.s6
+            button.btn.waves-effect.waves-light(type="submit", name="action") Отримати код входу
+
+      form#login-stage-2.col.s12.hide
+        .row
+          .input-field.col.s6
+            input(type="text", name="username", class="active")
+            label(for="username") Введіть отриманий в телеграм код входу
+        .row
+          .input-field.col.s6
+            button.btn.waves-effect.waves-light(type="submit", name="action") Увійти
+  script(src="/scripts/login.js")

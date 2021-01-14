@@ -1,8 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { UserNotFoundError } from '../errors/UserNotFoundError';
+import { UserNotFoundError } from './errors/UserNotFoundError';
 import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import { TCommands } from '../types/TCommands';
 import listeners from './listeners';
+import { inMemoryDb } from '../data-manager/in-memory-database';
 
 /**
  * Reads the file and gets the telegram user ID associated with a passed telegram name
@@ -21,7 +22,7 @@ export const getTelegramUserId = (telegramName: string, inMemoryDb: TInMemoryDat
 /**
  * Load bot listeners
  */
-const init = (bot: TelegramBot, inMemoryDb: TInMemoryDatabase): TelegramBot => {
+const init = (bot: TelegramBot): TelegramBot => {
   const commands: TCommands = {
     start: '/start',
     addPhone: '/додати телефон',

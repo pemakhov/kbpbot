@@ -7,7 +7,7 @@ import constants from './constants';
 import myTelegramBot from './bot';
 import telegramBotAPI from 'node-telegram-bot-api';
 import inMemoryDatabase from './data-manager/in-memory-database';
-import api from './api/server';
+import api from './api';
 
 if (!constants.TELEGRAM_TOKEN) {
   console.error('Please, provide a telegram bot token in the environment');
@@ -15,9 +15,8 @@ if (!constants.TELEGRAM_TOKEN) {
 }
 
 const bot = new telegramBotAPI(constants.TELEGRAM_TOKEN, { polling: true });
-
-inMemoryDatabase.init().then((db) => myTelegramBot.init(bot, db));
-
-// api
 const app = express();
+
+inMemoryDatabase.getStoredDataFromRedis().then((data) => inMemoryDatabase.fillIn(...data));
+myTelegramBot.init(bot);
 api.init(app);

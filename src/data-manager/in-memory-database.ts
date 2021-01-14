@@ -3,39 +3,19 @@ import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 import redisDb from './redis-db';
+import { localMonths } from '../utils/text-sets';
 
 const getPhoneKey = (obj: TPhone): string => {
   const parts: string[] = [obj.phone, obj.name, obj.department.replace(/\s/g, '')];
   return parts.map((x) => x.toLowerCase()).reduce((acc, x) => acc + x, '');
 };
 
-const getBirthdayKey = (obj: TBDay): string => {
-  const localMonths = [
-    'січень',
-    'лютий',
-    'березень',
-    'квітень',
-    'травень',
-    'червень',
-    'липень',
-    'серпень',
-    'вересень',
-    'жовтень',
-    'листопад',
-    'грудень',
-  ];
+const getBirthdayKey = (obj: TBDay): string => `${obj.name} ${obj.year} ${localMonths[obj.month + 1]}`.toLowerCase();
 
-  return `${obj.name} ${obj.year} ${localMonths[obj.month + 1]}`.toLowerCase();
-};
-
-function create(storedUsers: TUser[] = [], storedPhones: TPhone[] = [], storedBDays: TBDay[] = []): TInMemoryDatabase {
+function createInMemoryDb(): TInMemoryDatabase {
   const users: Map<number, TUser> = new Map();
   const phones: Map<string, TPhone> = new Map();
   const bDays: Map<string, TBDay> = new Map();
-
-  storedUsers.map((user) => users.set(user.id, user));
-  storedPhones.map((phone) => phones.set(getPhoneKey(phone), phone));
-  storedBDays.map((bDay) => bDays.set(getBirthdayKey(bDay), bDay));
 
   return {
     users: {
@@ -101,14 +81,23 @@ function create(storedUsers: TUser[] = [], storedPhones: TPhone[] = [], storedBD
   };
 }
 
-async function init(): Promise<TInMemoryDatabase> {
+export const inMemoryDb = createInMemoryDb();
+
+function fillIn(storedUsers: TUser[] = [], storedPhones: TPhone[] = [], storedBDays: TBDay[] = []): void {
+  storedUsers.map((user) => inMemoryDb.users.add(user));
+  storedPhones.map((phone) => inMemoryDb.phone.add(phone));
+  storedBDays.map((bDay) => inMemoryDb.birthday.add(bDay));
+}
+
+async function getStoredDataFromRedis(): Promise<[TUser[], TPhone[], TBDay[]]> {
   const users = await redisDb.getUsers();
   const phones = await redisDb.getPhones();
   const bDays = await redisDb.getBirthdays();
 
-  return create(users, phones, bDays);
+  return [users, phones, bDays];
 }
 
 export default {
-  init,
+  getStoredDataFromRedis,
+  fillIn,
 };
