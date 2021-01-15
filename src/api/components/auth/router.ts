@@ -13,4 +13,6 @@ router.get('/test', (req, res) => {
 
 router.post('/code-request', AuthModule.handleCodeRequest);
 
+router.post('/token-request', AuthModule.handleTokenRequest);
+
 export default { router };

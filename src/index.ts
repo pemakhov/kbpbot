@@ -14,7 +14,7 @@ if (!constants.TELEGRAM_TOKEN) {
   process.exit(1);
 }
 
-const bot = new telegramBotAPI(constants.TELEGRAM_TOKEN, { polling: true });
+export const bot = new telegramBotAPI(constants.TELEGRAM_TOKEN, { polling: true });
 const app = express();
 
 inMemoryDatabase.getStoredDataFromRedis().then((data) => inMemoryDatabase.fillIn(...data));

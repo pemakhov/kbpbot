@@ -1,5 +1,4 @@
 import { Application } from 'express';
-import { TInMemoryDatabase } from '../types/TInMemoryDatabase';
 import middleware from './config/middleware';
 import router from './config/router';
 

@@ -1,3 +1,5 @@
+import { number } from "joi";
+
 const constants = {
   /**
    * Telegram bot token
@@ -18,6 +20,16 @@ const constants = {
    * Telegram ID of the admin, who will be receive messages like statistics and changed database files
    */
   ADMIN_TELEGRAM_ID: process.env.ADMIN_TELEGRAM_ID || 0,
+
+  /**
+   * Number of digits in auth code sending to user at authentication
+   */
+  CONFIRM_CODE_LENGTH: 5,
+
+  /**
+   * A time period before the confirm code will be removed
+   */
+  CONFIRM_CODE_LIFE_TIME: 1000 * 60 * 3, // 3 minutes
 
   /**
    * Path to the user database file

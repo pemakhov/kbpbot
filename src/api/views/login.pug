@@ -7,9 +7,9 @@ block main
       form#login-stage-1.col.s12
         .row
           .input-field.col.s6
-            input(type="text", name="username", id="#login-stage-1__name-input", class="active")
+            input(type="text", name="username", id="login-stage-1__name-input", class="active")
             label(for="username") Введіть свій телеграм юзернейм (без @)
-            span.helper-text Увійти можуть лише акаунти, що мають телеграм-юзернейм та роль адміністратора
+            span#login-stage-1__name-input__helper.helper-text Увійти можуть лише акаунти, що мають телеграм-юзернейм та роль адміністратора
         .row
           .input-field.col.s6
             button.btn.waves-effect.waves-light(type="submit", name="action") Отримати код входу

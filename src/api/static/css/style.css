@@ -11,3 +11,7 @@ main {
 #login-form {
   width: 600px;
 }
+
+.error {
+  color: red;
+}
