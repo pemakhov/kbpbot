@@ -4,6 +4,9 @@ const nameInputHelper = <HTMLInputElement>document.getElementById('login-stage-1
 const defaultHelperText: string = nameInputHelper.innerHTML;
 
 const secondForm = <HTMLFormElement>document.getElementById('login-stage-2');
+const codeInput = <HTMLInputElement>document.getElementById('login-stage-2__code-input');
+
+const tryLoginAgain = <HTMLElement>document.getElementById('try-login-again');
 
 // Types
 type TError = {
@@ -35,17 +38,30 @@ const removeNameInputError = () => {
 };
 
 const handleFirstResponseError = (error: TError) => {
-  console.log(nameInputHelper.innerHTML);
   nameInputHelper.innerHTML = `${error.nativeMessage} (${error.message})`;
   nameInputHelper.classList.add('red-text');
   nameInput.addEventListener('input', removeNameInputError);
 };
 
+const showTryLoginAgainPage = (): void => {
+  tryLoginAgain?.classList.remove('hide');
+  secondForm?.classList.add('hide');
+};
+
+const fetchMainPage = (authToken: string): void => {
+  fetch('/', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+};
+
 // Main functions
-function handleInputNameForm(event: Event) {
+function handleInputNameForm(event: Event): void {
   event.preventDefault();
 
-  const username = nameInput.value;
+  const username = nameInput.value.trim();
   const url = 'code-request';
   nameInput.value = '';
 
@@ -66,16 +82,37 @@ function handleInputNameForm(event: Event) {
     .catch((error) => handleFirstResponseError(error));
 }
 
-function handleInputCodeForm(event: Event) {
+function handleInputCodeForm(event: Event): void {
   event.preventDefault();
-  firstForm?.classList.remove('hide');
-  secondForm?.classList.add('hide');
+
+  const code = codeInput.value.trim();
+  const url = 'login-with-code';
+  codeInput.value = '';
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ code }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      checkFirstResponseError(data);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      fetchMainPage(data.authToken);
+    })
+    .catch((error) => {
+      console.error(error);
+      showTryLoginAgainPage();
+    });
 }
 
-if (firstForm) {
-  firstForm.onsubmit = handleInputNameForm;
+function handleTryAgain(): void {
+  tryLoginAgain.classList.add('hide');
+  firstForm.classList.remove('hide');
 }
 
-if (secondForm) {
-  secondForm.onsubmit = handleInputCodeForm;
-}
+firstForm.onsubmit = handleInputNameForm;
+secondForm.onsubmit = handleInputCodeForm;
+tryLoginAgain.onclick = handleTryAgain;

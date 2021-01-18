@@ -3,8 +3,8 @@ extends layouts/main-layout.pug
 block main
   main
     .container
-      h3 Увійдіть
       form#login-stage-1.col.s12
+        h3 Увійдіть
         .row
           .input-field.col.s6
             input(type="text", name="username", id="login-stage-1__name-input", class="active")
@@ -15,11 +15,16 @@ block main
             button.btn.waves-effect.waves-light(type="submit", name="action") Отримати код входу
 
       form#login-stage-2.col.s12.hide
+        h3 Підтвердьте
         .row
           .input-field.col.s6
-            input(type="text", name="username", class="active")
-            label(for="username") Введіть отриманий в телеграм код входу
+            input(type="text", name="username", id="login-stage-2__code-input" class="active")
+            label(for="username") Введіть отриманий в телеграм код підтвердження
         .row
           .input-field.col.s6
             button.btn.waves-effect.waves-light(type="submit", name="action") Увійти
+      
+      #try-login-again.hide
+        h4 Код невірний
+        button.btn.waves-effect.waves-light(type="button", name="retry") Спробувати ще
   script(src="/scripts/login.js")

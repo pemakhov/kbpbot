@@ -1,6 +1,10 @@
-import constants from '../constants';
 import fs from 'fs';
 import { Logger } from 'tslog';
+
+/**
+ * Path to the user database file
+ */
+const USERS_DATA_FILE = `${__dirname}/../../assets/users.json`;
 
 type TOldUser = {
   id: number;
@@ -87,7 +91,7 @@ const readBDays = (path: string, data: Map<string, TOldBDay>): Map<string, TOldB
 
 const writeUser = async (userData: TOldUser): Promise<void> => {
   try {
-    await fs.writeFile(constants.USERS_DATA_FILE, JSON.stringify(userData).concat('\n'), { flag: 'a+' }, (error) => {
+    await fs.writeFile(USERS_DATA_FILE, JSON.stringify(userData).concat('\n'), { flag: 'a+' }, (error) => {
       if (error) {
         throw new Error('Failed to write user data');
       }
@@ -100,8 +104,8 @@ const writeUser = async (userData: TOldUser): Promise<void> => {
 const readUsers = (): Map<number, TOldUser> => {
   const users = new Map();
 
-  if (fs.existsSync(constants.USERS_DATA_FILE)) {
-    fs.readFileSync(constants.USERS_DATA_FILE)
+  if (fs.existsSync(USERS_DATA_FILE)) {
+    fs.readFileSync(USERS_DATA_FILE)
       .toString()
       .split('\n')
       .filter((x) => x)

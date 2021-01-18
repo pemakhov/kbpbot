@@ -1,6 +1,4 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { Logger } from 'tslog';
-import constants from '../constants';
 import rateLimiter from './rate-limiter';
 import { TooManyRequestsError } from './errors/TooManyRequestsError';
 import { TCommands } from '../types/TCommands';
@@ -13,7 +11,7 @@ import { monthsUkrAccusative } from '../utils/text-sets';
 import inputParser from './input-parser';
 import redisDb from '../data-manager/redis-db';
 
-const log = new Logger();
+const ADMIN_TELEGRAM_ID = process.env.ADMIN_TELEGRAM_ID || 0;
 
 /**
  * Collects user data from a message
@@ -47,7 +45,7 @@ function start(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
 
     redisDb.saveUser(user);
     inMemoryDb.users.add(user);
-    bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new user has joined:\n${JSON.stringify(user)}`);
+    bot.sendMessage(ADMIN_TELEGRAM_ID, `A new user has joined:\n${JSON.stringify(user)}`);
     bot.sendMessage(msg.chat.id, 'Відправте команду "/help", щоб побачити список інших доступних команд.');
   });
 
@@ -59,7 +57,7 @@ function help(bot: TelegramBot, command: string): TelegramBot {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -80,7 +78,7 @@ function help(bot: TelegramBot, command: string): TelegramBot {
 
 function onMessage(bot: TelegramBot, commands: TCommands): TelegramBot {
   bot.on('message', (msg: TelegramBot.Message) => {
-    log.info(msg);
+    console.info(msg);
     const userId: number = msg.chat.id;
     const messageTimestamp: number = msg.date;
 
@@ -89,7 +87,7 @@ function onMessage(bot: TelegramBot, commands: TCommands): TelegramBot {
         throw new TooManyRequestsError(rateLimiter.limit);
       }
     } catch (error) {
-      log.error(error.message);
+      console.error(error.message);
     }
 
     const messageText = msg.text?.toLowerCase();
@@ -107,7 +105,7 @@ function onClaim(bot: TelegramBot, command: string): TelegramBot {
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
     const claimFrom = `${msg.from?.first_name} ${msg.from?.last_name ? msg.from.last_name + ' ' : ''}(${
@@ -115,7 +113,7 @@ function onClaim(bot: TelegramBot, command: string): TelegramBot {
     }) пише:\n`;
     const claim = msg.text.toLowerCase().replace(command, '').trim();
 
-    bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `${claimFrom}${claim}`);
+    bot.sendMessage(ADMIN_TELEGRAM_ID, `${claimFrom}${claim}`);
     bot.sendMessage(chatId, 'Відправлено');
   });
   return bot;
@@ -126,7 +124,7 @@ function addPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -135,7 +133,7 @@ function addPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
 
       await redisDb.savePhone(data);
       inMemoryDb.phone.add(data);
-      bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new phone has been added:\n${JSON.stringify(data)}`);
+      bot.sendMessage(ADMIN_TELEGRAM_ID, `A new phone has been added:\n${JSON.stringify(data)}`);
       bot.sendMessage(chatId, 'Додано');
     } catch (error) {
       if (error.name === 'EValidationError') {
@@ -144,7 +142,7 @@ function addPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
       } else {
         bot.sendMessage(chatId, 'Щось пішло не так...');
       }
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;
@@ -155,7 +153,7 @@ function findPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatab
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -167,7 +165,7 @@ function findPhone(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatab
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;
@@ -178,7 +176,7 @@ function getAllPhones(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDa
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -190,7 +188,7 @@ function getAllPhones(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDa
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;
@@ -201,7 +199,7 @@ function addBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -210,8 +208,7 @@ function addBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
 
       await redisDb.saveBirthday(data);
       inMemoryDb.birthday.add(data);
-      bot.sendDocument(constants.ADMIN_TELEGRAM_ID, constants.BIRTHS_DATA_FILE);
-      bot.sendMessage(constants.ADMIN_TELEGRAM_ID, `A new birth date has been added:\n${JSON.stringify(data)}`);
+      bot.sendMessage(ADMIN_TELEGRAM_ID, `A new birth date has been added:\n${JSON.stringify(data)}`);
       bot.sendMessage(chatId, 'День народження збережено');
     } catch (error) {
       if (error.name === 'EValidationError') {
@@ -220,7 +217,7 @@ function addBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase)
       } else {
         bot.sendMessage(chatId, 'Щось пішло не так...');
       }
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;
@@ -231,7 +228,7 @@ function findBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -243,7 +240,7 @@ function findBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;
@@ -254,7 +251,7 @@ function getAllBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -267,7 +264,7 @@ function getAllBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDataba
       bot.sendMessage(chatId, result || 'Нічого не знайдено');
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;
@@ -278,7 +275,7 @@ function restBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
     const chatId = msg.chat.id;
 
     if (!msg.text) {
-      log.error('No text');
+      console.error('No text');
       return;
     }
 
@@ -296,7 +293,7 @@ function restBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
       bot.sendMessage(chatId, result);
     } catch (error) {
       bot.sendMessage(chatId, 'Щось пішло не так...');
-      log.error(error.message);
+      console.error(error.message);
     }
   });
   return bot;

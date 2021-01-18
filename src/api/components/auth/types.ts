@@ -1,4 +1,4 @@
 export type TConfirmCode = {
   code: string;
-  deleteTimeoutId: number;
+  deleteTimeoutId: NodeJS.Timeout;
 };
