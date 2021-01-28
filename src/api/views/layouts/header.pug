@@ -1,3 +1,16 @@
 header#header
-  .container.center
-    h2 Панель керування телеграм-ботом KBP-bot
+  nav.teal.lighten-1.row
+    .container.col.s2
+    .naw-wrapper.col.s8
+      a.brand-logo(href="/") kbpbot
+      ul.hide-on-med-and-down.right
+        li
+          if userName
+            span= userName
+          else if hideLogin
+            span
+          else
+            a(href="/auth/login")  Login
+    .container.col.s2
+
+

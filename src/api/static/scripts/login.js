@@ -10,7 +10,7 @@ var showSecondForm = function () {
     secondForm === null || secondForm === void 0 ? void 0 : secondForm.classList.remove('hide');
     firstForm === null || firstForm === void 0 ? void 0 : firstForm.classList.add('hide');
 };
-var checkFirstResponseError = function (res) {
+var checkResponseError = function (res) {
     var error = res.error;
     if (error)
         throw error;
@@ -28,10 +28,21 @@ var showTryLoginAgainPage = function () {
     tryLoginAgain === null || tryLoginAgain === void 0 ? void 0 : tryLoginAgain.classList.remove('hide');
     secondForm === null || secondForm === void 0 ? void 0 : secondForm.classList.add('hide');
 };
+var fetchMainPage = function () {
+    var refreshToken = localStorage.getItem('refreshToken');
+    console.log(refreshToken);
+    fetch('/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'text/html',
+            authentication: "Bearer " + refreshToken
+        }
+    }).then(function (res) { return res.text(); });
+};
 // Main functions
 function handleInputNameForm(event) {
     event.preventDefault();
-    var username = nameInput.value;
+    var username = nameInput.value.trim();
     var url = 'code-request';
     nameInput.value = '';
     fetch(url, {
@@ -43,15 +54,14 @@ function handleInputNameForm(event) {
     })
         .then(function (response) { return response.json(); })
         .then(function (data) {
-        console.log(data);
         return data;
     })
-        .then(function (data) { return checkFirstResponseError(data); })
+        .then(function (data) { return checkResponseError(data); })
         .then(function () { return showSecondForm(); })["catch"](function (error) { return handleFirstResponseError(error); });
 }
 function handleInputCodeForm(event) {
     event.preventDefault();
-    var code = codeInput.value;
+    var code = codeInput.value.trim();
     var url = 'login-with-code';
     codeInput.value = '';
     fetch(url, {
@@ -61,9 +71,13 @@ function handleInputCodeForm(event) {
         },
         body: JSON.stringify({ code: code })
     })
-        .then(function (response) { return response.json(); })
-        .then(function (data) { return checkFirstResponseError(data); })
-        .then(function () { return (window.location.href = '/'); })["catch"](function (error) {
+        .then(function (res) { return res.json(); })
+        .then(function (res) {
+        checkResponseError(res);
+        localStorage.setItem('accessToken', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
+        window.location.replace('/');
+    })["catch"](function (error) {
         console.error(error);
         showTryLoginAgainPage();
     });

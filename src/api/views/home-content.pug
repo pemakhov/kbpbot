@@ -1,0 +1,19 @@
+if userName
+  block header
+    include layouts/header.pug
+  main
+    #main-menu.container.collection
+      a.collection-item(href="#") 
+        span Користувачі
+        i.material-icons.secondary-content people
+      a.collection-item(href="#") 
+        span Телефони
+        i.material-icons.secondary-content phone_android
+      a.collection-item(href="#") 
+        span Дати народження
+        i.material-icons.secondary-content date_range
+  block footer
+    include layouts/footer.pug
+else
+  .container.center
+    h4 Панель керування доступна лише авторизованим адміністраторам

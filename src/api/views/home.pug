@@ -1,24 +1,6 @@
 extends layouts/main-layout.pug
 
-block main
-  main
-    .vertical-margined
-      .container
-        .row
-          .col.s4
-            .center
-              a.btn-floating.btn-large.waves-effect.waves-light
-                i.material-icons people
-              p.flow-text Користувачі
-          .col.s4
-            .center
-              a.btn-floating.btn-large.waves-effect.waves-light
-                i.material-icons phone_android
-              p.flow-text Телефони
-          .col.s4
-            .center
-              a.btn-floating.btn-large.waves-effect.waves-light
-                i.material-icons date_range
-              p.flow-text Дати народження
+block body
+  body#body
 
-  // script(src="/scripts/login.js")
+  script(src="/scripts/home.js")

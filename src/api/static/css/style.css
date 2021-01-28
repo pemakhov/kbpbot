@@ -19,3 +19,7 @@ main {
 .vertical-margined {
   margin: 5rem 0
 }
+
+#main-menu .collection-item:hover {
+  background-color: #e1f5fe;
+}

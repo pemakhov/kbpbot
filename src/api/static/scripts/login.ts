@@ -26,7 +26,7 @@ const showSecondForm = (): void => {
   firstForm?.classList.add('hide');
 };
 
-const checkFirstResponseError = (res: TResponse): void => {
+const checkResponseError = (res: TResponse): void => {
   const { error } = res;
 
   if (error) throw error;
@@ -48,13 +48,17 @@ const showTryLoginAgainPage = (): void => {
   secondForm?.classList.add('hide');
 };
 
-const fetchMainPage = (authToken: string): void => {
+const fetchMainPage = (): void => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  console.log(refreshToken);
+
   fetch('/', {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'text/html',
+      authentication: `Bearer ${refreshToken}`,
     },
-  });
+  }).then((res) => res.text());
 };
 
 // Main functions
@@ -74,10 +78,9 @@ function handleInputNameForm(event: Event): void {
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       return data;
     })
-    .then((data) => checkFirstResponseError(data))
+    .then((data) => checkResponseError(data))
     .then(() => showSecondForm())
     .catch((error) => handleFirstResponseError(error));
 }
@@ -96,11 +99,12 @@ function handleInputCodeForm(event: Event): void {
     },
     body: JSON.stringify({ code }),
   })
-    .then((response) => response.json())
-    .then((data) => {
-      checkFirstResponseError(data);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      fetchMainPage(data.authToken);
+    .then((res) => res.json())
+    .then((res) => {
+      checkResponseError(res);
+      localStorage.setItem('accessToken', res.accessToken);
+      localStorage.setItem('refreshToken', res.refreshToken);
+      window.location.replace('/');
     })
     .catch((error) => {
       console.error(error);

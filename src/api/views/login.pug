@@ -1,8 +1,10 @@
 extends layouts/main-layout.pug
 
-block main
-  main
-    .container
+block body
+  body#body
+    block header
+      include layouts/header.pug
+    main.container
       form#login-stage-1.col.s12
         h3 Увійдіть
         .row
@@ -27,4 +29,7 @@ block main
       #try-login-again.hide
         h4 Код невірний
         button.btn.waves-effect.waves-light(type="button", name="retry") Спробувати ще
+    block footer
+      include layouts/footer.pug
+
   script(src="/scripts/login.js")
