@@ -3,6 +3,7 @@ import { TUser } from '../../../types/TUser';
 import { StatusCodes, ReasonPhrases } from 'http-status-codes';
 import Validator from './validation';
 import Service from './service';
+import UserService from '../users/service';
 import Schemas from './schemas';
 import Constants from '../../constants';
 import { ValidationError } from '../../errors/ValidationError';
@@ -40,7 +41,7 @@ function handleCodeRequest(req: Request, res: Response): void {
 
     const { username } = req.body;
     const searchableUsername = username.trim().toLowerCase();
-    const user: TUser | undefined = Service.getUserByUsername(searchableUsername);
+    const user: TUser | undefined = UserService.getByUsername(searchableUsername);
 
     if (!user) throw new NotFoundError('User not found');
     if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
@@ -79,7 +80,7 @@ async function processLoginWithCode(req: Request, res: Response): Promise<void> 
       throw new ForbiddenError('Forbidden. Code is not correct');
     }
 
-    const user: TUser | undefined = Service.getUserById(userId);
+    const user: TUser | undefined = UserService.getById(userId);
 
     if (!user) throw new NotFoundError('User not found');
     if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
@@ -106,20 +107,24 @@ function authenticate(req: Request, res: Response, next: NextFunction): void {
 
   const accessToken: string = authorization.split(' ')[1];
 
-  jwt.verify(accessToken, constants.ACCESS_TOKEN_SECRET, (error, decoded) => {
-    if (error) {
-      if (error.name === 'TokenExpiredError') {
-        const refreshAddress = req.path;
-        res.status(StatusCodes.FORBIDDEN).render('refresh', { refreshAddress });
+  try {
+    jwt.verify(accessToken, constants.ACCESS_TOKEN_SECRET, (error, decoded) => {
+      if (error) {
+        throw error;
       }
-      throw error;
+
+      const { userName } = decoded as TUser;
+
+      req.body.userName = userName;
+      next();
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      const refreshAddress = req.path;
+      res.status(StatusCodes.FORBIDDEN).render('refresh', { refreshAddress });
     }
-
-    const { userName } = decoded as TUser;
-
-    req.body.userName = userName;
     next();
-  });
+  }
 }
 
 function refresh(req: Request, res: Response): void {

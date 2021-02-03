@@ -1,17 +1,25 @@
 if userName
   block header
     include layouts/header.pug
-  main
-    #main-menu.container.collection
-      a.collection-item(href="#") 
-        span Користувачі
-        i.material-icons.secondary-content people
-      a.collection-item(href="#") 
-        span Телефони
-        i.material-icons.secondary-content phone_android
-      a.collection-item(href="#") 
-        span Дати народження
-        i.material-icons.secondary-content date_range
+  main.container
+    form#data-selector(action="#")
+      label
+        input(id="data-selector__users" name="group1", type="radio", checked)
+        span
+          i.material-icons.secondary-content people
+          span Користувачі
+      label
+        input(id="data-selector__phones" name="group2", type="radio")
+        span
+          i.material-icons.secondary-content phone_android
+          span Телефони
+      label
+        input(id="data-selector__birthdays" name="group3", type="radio")
+        span 
+          i.material-icons.secondary-content date_range
+          span Дати народження
+    #data
+
   block footer
     include layouts/footer.pug
 else

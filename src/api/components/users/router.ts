@@ -1,5 +1,8 @@
 import { Router } from 'express';
+import UsersModule from './';
 
 const router = Router();
 
-// router.get('/users', )
+router.get('/', UsersModule.findAll);
+
+export default { router };

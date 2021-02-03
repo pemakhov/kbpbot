@@ -1,14 +1,4 @@
-import { inMemoryDb } from '../../../data-manager/in-memory-database';
-import { TUser } from '../../../types/TUser';
 import { TConfirmCode } from './types';
-
-function getUserByUsername(username: string): TUser | undefined {
-  return inMemoryDb.users.getByTelegramName(username);
-}
-
-function getUserById(id: number | string): TUser | undefined {
-  return inMemoryDb.users.getById(+id);
-}
 
 function getConfirmCode(digits: number): string {
   return Math.random()
@@ -38,8 +28,6 @@ function isCodeCorrect(code: string, userId: number, storage: Map<number, TConfi
 }
 
 export default {
-  getUserByUsername,
-  getUserById,
   getConfirmCode,
   saveConfirmCode,
   deleteOldConfirmCode,

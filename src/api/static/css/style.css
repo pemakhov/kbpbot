@@ -20,6 +20,30 @@ main {
   margin: 5rem 0
 }
 
-#main-menu .collection-item:hover {
-  background-color: #e1f5fe;
+#data-selector {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+#data-selector label {
+  display: flex;
+  flex-direction: row;
+  margin: 0 20px;
+}
+
+#data-selector label span {
+  display: flex;
+  flex-direction: row;
+  order: -1;
+}
+
+#data-selector label span i {
+  order: -1;
+  margin: 0 10px 0 0;
+}
+
+#data-selector label input {
+  margin: 0;
 }
