@@ -4,12 +4,7 @@ if userName
   main.container
     form#data-selector(action="#")
       label
-        input(id="data-selector__users" name="group1", type="radio", checked)
-        span
-          i.material-icons.secondary-content people
-          span Користувачі
-      label
-        input(id="data-selector__phones" name="group2", type="radio")
+        input(id="data-selector__phones" name="group2", type="radio", checked)
         span
           i.material-icons.secondary-content phone_android
           span Телефони
@@ -18,6 +13,11 @@ if userName
         span 
           i.material-icons.secondary-content date_range
           span Дати народження
+      label
+        input(id="data-selector__users" name="group1", type="radio")
+        span
+          i.material-icons.secondary-content people
+          span Користувачі
     #data
 
   block footer

@@ -26,33 +26,90 @@ type TBDay = {
 
 const mainBlock = <HTMLElement>document.getElementById('body');
 
-const fetchUsers = async (): Promise<TUser[]> => {
-  const users = await fetch('/users', {
+const fetchData = async (type: string): Promise<unknown[]> => {
+  const data = await fetch(`/${type}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'text/json',
     },
   });
-  return users.json();
+  return data.json();
 };
 
-const getUsersTable = (users: TUser[]): string => {
-  console.log(users);
+const getPhonesTable = (phones: TPhone[]): string => {
   return `
   <table>
     <thead>
       <tr>
-        <td>Ім'я</td>
-        <td>Прізвище</td>
-        <td>Юзернейм</td>
-        <td>Адміністратор</td>
-        <td>Дата створення</td>
+        <th hidden>Id</td>
+        <th>Телефон</td>
+        <th>Відділ</td>
+        <th>Ім'я</td>
+      </tr>
+    </thead>
+    <tbody>
+      ${phones.reduce((acc: string, phone: TPhone) => {
+        return (acc += `
+      <tr>
+        <td hidden>${phone.id}</td>
+        <td>${phone.phone}</td>
+        <td>${phone.department}</td>
+        <td>${phone.name}</td>
+      </tr>
+      `);
+      }, '')}
+    </tbody>
+  </table>
+  `;
+};
+
+const getBirthdaysTable = (birthdays: TBDay[]): string => {
+  return `
+  <table>
+    <thead>
+      <tr>
+        <th hidden>Id</td>
+        <th>Ім'я</td>
+        <th>День</td>
+        <th>Місяць</td>
+        <th>Рік</td>
+      </tr>
+    </thead>
+    <tbody>
+      ${birthdays.reduce((acc: string, birthday: TBDay) => {
+        return (acc += `
+      <tr>
+        <td hidden>${birthday.id}</td>
+        <td>${birthday.name}</td>
+        <td>${birthday.day}</td>
+        <td>${birthday.month}</td>
+        <td>${birthday.year}</td>
+      </tr>
+      `);
+      }, '')}
+    </tbody>
+  </table>
+  `;
+};
+
+const getUsersTable = (users: TUser[]): string => {
+  return `
+  <table>
+    <thead>
+      <tr>
+        <th hidden>Id</td>
+        <th>Ім'я</td>
+        <th>Прізвище</td>
+        <th>Юзернейм</td>
+        <th>Адміністратор</td>
+        <th>Дата створення</td>
       </tr>
     </thead>
     <tbody>
       ${users.reduce((acc: string, user: TUser) => {
         return (acc += `
       <tr>
+        <td hidden>${user.id}</td>
         <td>${user.firstName}</td>
         <td>${user.lastName}</td>
         <td>${user.userName}</td>
@@ -64,11 +121,6 @@ const getUsersTable = (users: TUser[]): string => {
     </tbody>
   </table>
   `;
-};
-
-const getPhonesTable = (phones: TPhone): string => {
-  // TODO: phones and bdays modules with routers. fetch phones and bdays and format corresponding tables
-  return '';
 };
 
 const emptyBlock = (block: HTMLElement) => (block.innerHTML = '');
@@ -94,20 +146,33 @@ const createDataSelector = (
           phonesButton.checked = true;
           birthdaysButton.checked = false;
           emptyBlock(dataBlock);
+          fetchData('phones')
+            .then((data) => {
+              const phones: TPhone[] = data as TPhone[];
+              return getPhonesTable(phones);
+            })
+            .then((table) => (dataBlock.innerHTML = table));
           break;
         case 'birthdays':
           usersButton.checked = false;
           phonesButton.checked = false;
           birthdaysButton.checked = true;
           emptyBlock(dataBlock);
+          fetchData('birthdays')
+            .then((data) => {
+              const birthdays: TBDay[] = data as TBDay[];
+              return getBirthdaysTable(birthdays);
+            })
+            .then((table) => (dataBlock.innerHTML = table));
           break;
         default:
           usersButton.checked = true;
           phonesButton.checked = false;
           birthdaysButton.checked = false;
           emptyBlock(dataBlock);
-          fetchUsers()
-            .then((users) => {
+          fetchData('users')
+            .then((data) => {
+              const users: TUser[] = data as TUser[];
               return getUsersTable(users);
             })
             .then((table) => (dataBlock.innerHTML = table));
@@ -151,7 +216,7 @@ const addDataSelectorListeners = () => {
   phonesButton.addEventListener('change', () => dataManager.setCurrentOption('phones'));
   birthdaysButton.addEventListener('change', () => dataManager.setCurrentOption('birthdays'));
 
-  dataManager.setCurrentOption('users');
+  dataManager.setCurrentOption('phones');
 };
 
 function getContent() {

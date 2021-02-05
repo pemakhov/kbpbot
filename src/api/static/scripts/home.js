@@ -36,31 +36,36 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _this = this;
 var mainBlock = document.getElementById('body');
-var fetchUsers = function () { return __awaiter(_this, void 0, void 0, function () {
-    var users;
+var fetchData = function (type) { return __awaiter(_this, void 0, void 0, function () {
+    var data;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, fetch('/users', {
+            case 0: return [4 /*yield*/, fetch("/" + type, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'text/json'
                     }
                 })];
             case 1:
-                users = _a.sent();
-                return [2 /*return*/, users.json()];
+                data = _a.sent();
+                return [2 /*return*/, data.json()];
         }
     });
 }); };
-var getUsersTable = function (users) {
-    console.log(users);
-    return "\n  <table>\n    <thead>\n      <tr>\n        <td>\u0406\u043C'\u044F</td>\n        <td>\u041F\u0440\u0456\u0437\u0432\u0438\u0449\u0435</td>\n        <td>\u042E\u0437\u0435\u0440\u043D\u0435\u0439\u043C</td>\n        <td>\u0410\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0442\u043E\u0440</td>\n        <td>\u0414\u0430\u0442\u0430 \u0441\u0442\u0432\u043E\u0440\u0435\u043D\u043D\u044F</td>\n      </tr>\n    </thead>\n    <tbody>\n      " + users.reduce(function (acc, user) {
-        return (acc += "\n      <tr>\n        <td>" + user.firstName + "</td>\n        <td>" + user.lastName + "</td>\n        <td>" + user.userName + "</td>\n        <td>" + user.isAdmin + "</td>\n        <td>" + user.date + "</td>\n      </tr>\n      ");
+var getPhonesTable = function (phones) {
+    return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Id</td>\n        <th>\u0422\u0435\u043B\u0435\u0444\u043E\u043D</td>\n        <th>\u0412\u0456\u0434\u0434\u0456\u043B</td>\n        <th>\u0406\u043C'\u044F</td>\n      </tr>\n    </thead>\n    <tbody>\n      " + phones.reduce(function (acc, phone) {
+        return (acc += "\n      <tr>\n        <td hidden>" + phone.id + "</td>\n        <td>" + phone.phone + "</td>\n        <td>" + phone.department + "</td>\n        <td>" + phone.name + "</td>\n      </tr>\n      ");
     }, '') + "\n    </tbody>\n  </table>\n  ";
 };
-var getPhonesTable = function (phones) {
-    // TODO: phones and bdays modules with routers. fetch phones and bdays and format corresponding tables
-    return '';
+var getBirthdaysTable = function (birthdays) {
+    return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Id</td>\n        <th>\u0406\u043C'\u044F</td>\n        <th>\u0414\u0435\u043D\u044C</td>\n        <th>\u041C\u0456\u0441\u044F\u0446\u044C</td>\n        <th>\u0420\u0456\u043A</td>\n      </tr>\n    </thead>\n    <tbody>\n      " + birthdays.reduce(function (acc, birthday) {
+        return (acc += "\n      <tr>\n        <td hidden>" + birthday.id + "</td>\n        <td>" + birthday.name + "</td>\n        <td>" + birthday.day + "</td>\n        <td>" + birthday.month + "</td>\n        <td>" + birthday.year + "</td>\n      </tr>\n      ");
+    }, '') + "\n    </tbody>\n  </table>\n  ";
+};
+var getUsersTable = function (users) {
+    return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Id</td>\n        <th>\u0406\u043C'\u044F</td>\n        <th>\u041F\u0440\u0456\u0437\u0432\u0438\u0449\u0435</td>\n        <th>\u042E\u0437\u0435\u0440\u043D\u0435\u0439\u043C</td>\n        <th>\u0410\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0442\u043E\u0440</td>\n        <th>\u0414\u0430\u0442\u0430 \u0441\u0442\u0432\u043E\u0440\u0435\u043D\u043D\u044F</td>\n      </tr>\n    </thead>\n    <tbody>\n      " + users.reduce(function (acc, user) {
+        return (acc += "\n      <tr>\n        <td hidden>" + user.id + "</td>\n        <td>" + user.firstName + "</td>\n        <td>" + user.lastName + "</td>\n        <td>" + user.userName + "</td>\n        <td>" + user.isAdmin + "</td>\n        <td>" + user.date + "</td>\n      </tr>\n      ");
+    }, '') + "\n    </tbody>\n  </table>\n  ";
 };
 var emptyBlock = function (block) { return (block.innerHTML = ''); };
 var createDataSelector = function (usersButton, phonesButton, birthdaysButton) {
@@ -78,20 +83,33 @@ var createDataSelector = function (usersButton, phonesButton, birthdaysButton) {
                     phonesButton.checked = true;
                     birthdaysButton.checked = false;
                     emptyBlock(dataBlock);
+                    fetchData('phones')
+                        .then(function (data) {
+                        var phones = data;
+                        return getPhonesTable(phones);
+                    })
+                        .then(function (table) { return (dataBlock.innerHTML = table); });
                     break;
                 case 'birthdays':
                     usersButton.checked = false;
                     phonesButton.checked = false;
                     birthdaysButton.checked = true;
                     emptyBlock(dataBlock);
+                    fetchData('birthdays')
+                        .then(function (data) {
+                        var birthdays = data;
+                        return getBirthdaysTable(birthdays);
+                    })
+                        .then(function (table) { return (dataBlock.innerHTML = table); });
                     break;
                 default:
                     usersButton.checked = true;
                     phonesButton.checked = false;
                     birthdaysButton.checked = false;
                     emptyBlock(dataBlock);
-                    fetchUsers()
-                        .then(function (users) {
+                    fetchData('users')
+                        .then(function (data) {
+                        var users = data;
                         return getUsersTable(users);
                     })
                         .then(function (table) { return (dataBlock.innerHTML = table); });
@@ -127,7 +145,7 @@ var addDataSelectorListeners = function () {
     usersButton.addEventListener('change', function () { return dataManager.setCurrentOption('users'); });
     phonesButton.addEventListener('change', function () { return dataManager.setCurrentOption('phones'); });
     birthdaysButton.addEventListener('change', function () { return dataManager.setCurrentOption('birthdays'); });
-    dataManager.setCurrentOption('users');
+    dataManager.setCurrentOption('phones');
 };
 function getContent() {
     fetch('/', {
