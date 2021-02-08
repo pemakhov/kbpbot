@@ -9,19 +9,19 @@ export type TInMemoryDatabase = {
     getById: (id: number) => TUser | undefined;
     getByTelegramName: (name: string) => TUser | undefined;
     exists: (id: number) => boolean;
-    update: (user: TUser) => Map<number, TUser> | null;
+    update: (user: TUser) => TUser | null;
   };
   phone: {
     all: () => TPhone[];
     add: (phone: TPhone) => TPhone;
     find: (searchKey: string) => (TPhone | undefined)[];
-    update: (oldPhone: TPhone, newPhone: TPhone) => boolean;
+    update: (oldPhone: TPhone, newPhone: TPhone) => TPhone | null;
   };
   birthday: {
     all: () => TBDay[];
     add: (bDay: TBDay) => TBDay;
     find: (name: string) => (TBDay | undefined)[];
     inMonth: (month: number) => (TBDay | undefined)[];
-    update: (oldBirthday: TBDay, newBirthday: TBDay) => boolean;
+    update: (oldBirthday: TBDay, newBirthday: TBDay) => TBDay | null;
   };
 };

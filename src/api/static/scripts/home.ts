@@ -36,25 +36,53 @@ const fetchData = async (type: string): Promise<unknown[]> => {
   return data.json();
 };
 
+function handleEditRow(rowId: string) {
+  const row = <HTMLElement>document.getElementById(rowId);
+  const oldUser: TPhone = JSON.parse(row.childNodes[1].textContent || '');
+  const form = `
+    <form>
+      <td><input type="text" name="phone" value="${oldUser.phone}"></td>
+      <td><input type="text" name="department" value="${oldUser.department}"></td>
+      <td><input type="text" name="name" value="${oldUser.name}"></td>
+      <td>
+        <button class="waves-effect waves-light btn-small"><i class="material-icons">close</i></button>
+        <button class="waves-effect waves-light btn-small"><i class="material-icons">check</i></button>
+      </td>
+    </form>
+  `;
+  console.log(JSON.parse(row.childNodes[1].textContent || ''));
+  row.innerHTML = form;
+}
+
 const getPhonesTable = (phones: TPhone[]): string => {
   return `
   <table>
     <thead>
       <tr>
-        <th hidden>Id</td>
+        <th hidden>Summary</td>
         <th>Телефон</td>
         <th>Відділ</td>
         <th>Ім'я</td>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       ${phones.reduce((acc: string, phone: TPhone) => {
         return (acc += `
-      <tr>
-        <td hidden>${phone.id}</td>
+      <tr id="${phone.id}">
+        <td hidden id="${phone.id}_">${JSON.stringify(phone)}</td>
         <td>${phone.phone}</td>
         <td>${phone.department}</td>
         <td>${phone.name}</td>
+        <td>
+          <button
+            class="waves-effect
+            waves-light
+            btn-small"
+            onclick="handleEditRow('${phone.id}')"
+            >
+              Редагувати
+          </button></td>
       </tr>
       `);
       }, '')}

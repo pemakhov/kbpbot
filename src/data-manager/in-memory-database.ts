@@ -4,7 +4,6 @@ import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 import redisDb from './redis-db';
 import { localMonths } from '../utils/text-sets';
-import birthdays from '../api/components/birthdays';
 
 const getPhoneKey = (obj: TPhone): string => {
   const parts: string[] = [obj.phone, obj.name, obj.department.replace(/\s/g, '')];
@@ -34,7 +33,8 @@ function createInMemoryDb(): TInMemoryDatabase {
         if (!users.get(user.id)) {
           return null;
         }
-        return users.set(user.id, user);
+        users.set(user.id, user);
+        return user;
       },
     },
     phone: {
@@ -63,9 +63,14 @@ function createInMemoryDb(): TInMemoryDatabase {
           );
       },
       update(oldPhone, newPhone) {
-        phones.delete(getPhoneKey(oldPhone));
-        phones.set(getPhoneKey(newPhone), newPhone);
-        return true;
+        try {
+          phones.delete(getPhoneKey(oldPhone));
+          phones.set(getPhoneKey(newPhone), newPhone);
+          return newPhone;
+        } catch (error) {
+          console.error(error.message);
+          return null;
+        }
       },
     },
     birthday: {
@@ -92,9 +97,14 @@ function createInMemoryDb(): TInMemoryDatabase {
       inMonth: (month) => [...bDays.values()].flat().filter((bDay) => new Date(bDay.date).getMonth() === month),
 
       update(oldBirthday, newBirthday) {
-        bDays.delete(getBirthdayKey(oldBirthday));
-        bDays.set(getBirthdayKey(newBirthday), newBirthday);
-        return true;
+        try {
+          bDays.delete(getBirthdayKey(oldBirthday));
+          bDays.set(getBirthdayKey(newBirthday), newBirthday);
+          return newBirthday;
+        } catch (error) {
+          console.error(error.message);
+          return null;
+        }
       },
     },
   };

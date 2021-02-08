@@ -52,9 +52,16 @@ var fetchData = function (type) { return __awaiter(_this, void 0, void 0, functi
         }
     });
 }); };
+function handleEditRow(rowId) {
+    var row = document.getElementById(rowId);
+    var oldUser = JSON.parse(row.childNodes[1].textContent || '');
+    var form = "\n    <form>\n      <td><input type=\"text\" name=\"phone\" value=\"" + oldUser.phone + "\"></td>\n      <td><input type=\"text\" name=\"department\" value=\"" + oldUser.department + "\"></td>\n      <td><input type=\"text\" name=\"name\" value=\"" + oldUser.name + "\"></td>\n      <td>\n        <button class=\"waves-effect waves-light btn-small\"><i class=\"material-icons\">close</i></button>\n        <button class=\"waves-effect waves-light btn-small\"><i class=\"material-icons\">check</i></button>\n      </td>\n    </form>\n  ";
+    console.log(JSON.parse(row.childNodes[1].textContent || ''));
+    row.innerHTML = form;
+}
 var getPhonesTable = function (phones) {
-    return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Id</td>\n        <th>\u0422\u0435\u043B\u0435\u0444\u043E\u043D</td>\n        <th>\u0412\u0456\u0434\u0434\u0456\u043B</td>\n        <th>\u0406\u043C'\u044F</td>\n      </tr>\n    </thead>\n    <tbody>\n      " + phones.reduce(function (acc, phone) {
-        return (acc += "\n      <tr>\n        <td hidden>" + phone.id + "</td>\n        <td>" + phone.phone + "</td>\n        <td>" + phone.department + "</td>\n        <td>" + phone.name + "</td>\n      </tr>\n      ");
+    return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Summary</td>\n        <th>\u0422\u0435\u043B\u0435\u0444\u043E\u043D</td>\n        <th>\u0412\u0456\u0434\u0434\u0456\u043B</td>\n        <th>\u0406\u043C'\u044F</td>\n        <th></th>\n      </tr>\n    </thead>\n    <tbody>\n      " + phones.reduce(function (acc, phone) {
+        return (acc += "\n      <tr id=\"" + phone.id + "\">\n        <td hidden id=\"" + phone.id + "_\">" + JSON.stringify(phone) + "</td>\n        <td>" + phone.phone + "</td>\n        <td>" + phone.department + "</td>\n        <td>" + phone.name + "</td>\n        <td>\n          <button\n            class=\"waves-effect\n            waves-light\n            btn-small\"\n            onclick=\"handleEditRow('" + phone.id + "')\"\n            >\n              \u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438\n          </button></td>\n      </tr>\n      ");
     }, '') + "\n    </tbody>\n  </table>\n  ";
 };
 var getBirthdaysTable = function (birthdays) {

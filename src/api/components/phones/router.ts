@@ -5,4 +5,6 @@ const router = Router();
 
 router.get('/', PhonesModule.findAll);
 
+router.post('/', PhonesModule.update);
+
 export default { router };
