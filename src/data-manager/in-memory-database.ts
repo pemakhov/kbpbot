@@ -29,13 +29,7 @@ function createInMemoryDb(): TInMemoryDatabase {
 
       exists: (id) => users.has(id),
 
-      update: (user) => {
-        if (!users.get(user.id)) {
-          return null;
-        }
-        users.set(user.id, user);
-        return user;
-      },
+      clear: () => users.clear(),
     },
     phone: {
       all: () =>
@@ -62,16 +56,8 @@ function createInMemoryDb(): TInMemoryDatabase {
             (a, b) => a?.department.localeCompare(b?.department || '') || a?.name.localeCompare(b?.name || '') || 0
           );
       },
-      update(oldPhone, newPhone) {
-        try {
-          phones.delete(getPhoneKey(oldPhone));
-          phones.set(getPhoneKey(newPhone), newPhone);
-          return newPhone;
-        } catch (error) {
-          console.error(error.message);
-          return null;
-        }
-      },
+
+      clear: () => phones.clear(),
     },
     birthday: {
       all: () => [...bDays.values()],
@@ -96,23 +82,14 @@ function createInMemoryDb(): TInMemoryDatabase {
 
       inMonth: (month) => [...bDays.values()].flat().filter((bDay) => new Date(bDay.date).getMonth() === month),
 
-      update(oldBirthday, newBirthday) {
-        try {
-          bDays.delete(getBirthdayKey(oldBirthday));
-          bDays.set(getBirthdayKey(newBirthday), newBirthday);
-          return newBirthday;
-        } catch (error) {
-          console.error(error.message);
-          return null;
-        }
-      },
+      clear: () => bDays.clear(),
     },
   };
 }
 
 export const inMemoryDb = createInMemoryDb();
 
-function fillIn(storedUsers: TUser[] = [], storedPhones: TPhone[] = [], storedBDays: TBDay[] = []): void {
+export function fillIn(storedUsers: TUser[] = [], storedPhones: TPhone[] = [], storedBDays: TBDay[] = []): void {
   storedUsers.map((user) => inMemoryDb.users.add(user));
   storedPhones.map((phone) => inMemoryDb.phone.add(phone));
   storedBDays.map((bDay) => inMemoryDb.birthday.add(bDay));

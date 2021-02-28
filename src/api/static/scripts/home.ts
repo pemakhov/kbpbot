@@ -17,11 +17,30 @@ type TPhone = {
 
 type TBDay = {
   id: string;
+  name: string;
   date: string;
   day: number;
   month: number;
   year: number;
-  name: string;
+};
+
+const state: {
+  editing: boolean;
+  currentRow: HTMLElement | null;
+  currentRowReservedCopy: string;
+  currentRowOldData: TPhone | TBDay | TUser | null;
+} = {
+  editing: false,
+  currentRow: null,
+  currentRowReservedCopy: '',
+  currentRowOldData: null,
+};
+
+const resetState = () => {
+  state.editing = false;
+  state.currentRow = null;
+  state.currentRowReservedCopy = '';
+  state.currentRowOldData = null;
 };
 
 const mainBlock = <HTMLElement>document.getElementById('body');
@@ -36,58 +55,90 @@ const fetchData = async (type: string): Promise<unknown[]> => {
   return data.json();
 };
 
+function handleCancelEditRow() {
+  console.log(state);
+  if (state.currentRow !== null) {
+    state.currentRow.innerHTML = state.currentRowReservedCopy;
+  }
+
+  resetState();
+}
+
+function handleSubmitEditRow(event: Event) {
+  event.preventDefault();
+  console.log('submitting');
+}
+
 function handleEditRow(rowId: string) {
+  if (state.editing) {
+    return;
+  }
+  state.editing = true;
+
   const row = <HTMLElement>document.getElementById(rowId);
-  const oldUser: TPhone = JSON.parse(row.childNodes[1].textContent || '');
+
+  state.currentRow = row;
+  state.currentRowReservedCopy = row.innerHTML;
+  console.log('first child: ');
+  console.log(row.firstChild);
+  // state.currentRowOldData = JSON.parse(row.firstChild) as TPhone;
+  console.log(row);
+
+  const phoneData: TPhone = JSON.parse(row.childNodes[1].textContent || '');
   const form = `
-    <form>
-      <td><input type="text" name="phone" value="${oldUser.phone}"></td>
-      <td><input type="text" name="department" value="${oldUser.department}"></td>
-      <td><input type="text" name="name" value="${oldUser.name}"></td>
-      <td>
-        <button class="waves-effect waves-light btn-small"><i class="material-icons">close</i></button>
-        <button class="waves-effect waves-light btn-small"><i class="material-icons">check</i></button>
-      </td>
+    <form id="phone-edit" onsubmit="handleSubmitEditRow()">
+      <div class="col s2">
+        <input type="text" name="phone" value="${phoneData.phone}" />
+      </div>
+      <div class="col s2">
+        <input type="text" name="department" value="${phoneData.department}">
+      </div>
+      <div class="col s4">
+        <input type="text" name="name" value="${phoneData.name}" />
+      </div>
+      <div class="col s1">
+        <span>
+          <button class="waves-light btn-small" onclick="handleCancelEditRow()">
+              <i class="material-icons">close</i>
+          </button>
+      </div>
+      <div class="col s1">
+          <button form="phone-edit" value="submit" class="waves-light btn-small"><i class="material-icons">check</i></button>
+        </span>
+      </div>
     </form>
   `;
-  console.log(JSON.parse(row.childNodes[1].textContent || ''));
   row.innerHTML = form;
 }
 
 const getPhonesTable = (phones: TPhone[]): string => {
   return `
-  <table>
-    <thead>
-      <tr>
-        <th hidden>Summary</td>
-        <th>Телефон</td>
-        <th>Відділ</td>
-        <th>Ім'я</td>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      ${phones.reduce((acc: string, phone: TPhone) => {
-        return (acc += `
-      <tr id="${phone.id}">
-        <td hidden id="${phone.id}_">${JSON.stringify(phone)}</td>
-        <td>${phone.phone}</td>
-        <td>${phone.department}</td>
-        <td>${phone.name}</td>
-        <td>
-          <button
-            class="waves-effect
-            waves-light
-            btn-small"
-            onclick="handleEditRow('${phone.id}')"
-            >
-              Редагувати
-          </button></td>
-      </tr>
-      `);
-      }, '')}
-    </tbody>
-  </table>
+    <div class="row">
+      <div hidden>Summary</div>
+      <div class="col s2"><h6>Телефон</h6></div>
+      <div class="col s2"><h6>Відділ</h6></div>
+      <div class="col s4"><h6>Ім'я</h6></div>
+      <div class="col s1"><h6></h6></div>
+      <div class="col s1"><h6></h6></div>
+    </div>
+    ${phones.reduce((acc: string, phone: TPhone) => {
+      return (acc += `
+    <div class="row" id="${phone.id}">
+      <div hidden id="${phone.id}_">${JSON.stringify(phone)}</div>
+      <div class="col s2">${phone.phone}</div>
+      <div class="col s2">${phone.department}</div>
+      <div class="col s4">${phone.name}</div>
+      <div class="col s1">
+        <button class="waves-light btn-small" onclick="handleEditRow('${phone.id}')">
+           <i class="material-icons">edit</i> 
+        </button>
+      </div>
+      <div class="col s1">
+        <button class="waves-light btn-small"><i class="material-icons">delete</i></button>
+       </div>
+    </div>
+    `);
+    }, '')}
   `;
 };
 
@@ -168,6 +219,9 @@ const createDataSelector = (
         return;
       }
       this.value = value;
+
+      resetState();
+
       switch (value) {
         case 'phones':
           usersButton.checked = false;

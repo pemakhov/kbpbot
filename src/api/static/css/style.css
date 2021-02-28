@@ -48,3 +48,7 @@ main {
 #data-selector label input {
   margin: 0;
 }
+
+table tr form {
+  display: flex;
+}

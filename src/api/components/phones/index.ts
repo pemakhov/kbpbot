@@ -6,14 +6,14 @@ function findAll(req: Request, res: Response): void {
 }
 
 function update(req: Request, res: Response): void {
-  const { oldPhone, newPhone } = req.body;
+  const { newPhone } = req.body;
 
-  if (!oldPhone || !newPhone) {
+  if (!newPhone) {
     res.status(400);
     return;
   }
 
-  const updatedPhone = Service.update(oldPhone, newPhone);
+  const updatedPhone = Service.update(newPhone);
 
   if (updatedPhone === null) {
     res.status(404).json({ error: "Can't update phone" });

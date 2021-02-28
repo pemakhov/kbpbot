@@ -35,6 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
+var state = {
+    editing: false,
+    currentRow: null,
+    currentRowReservedCopy: '',
+    currentRowOldData: null
+};
+var resetState = function () {
+    state.editing = false;
+    state.currentRow = null;
+    state.currentRowReservedCopy = '';
+    state.currentRowOldData = null;
+};
 var mainBlock = document.getElementById('body');
 var fetchData = function (type) { return __awaiter(_this, void 0, void 0, function () {
     var data;
@@ -52,17 +64,37 @@ var fetchData = function (type) { return __awaiter(_this, void 0, void 0, functi
         }
     });
 }); };
+function handleCancelEditRow() {
+    console.log(state);
+    if (state.currentRow !== null) {
+        state.currentRow.innerHTML = state.currentRowReservedCopy;
+    }
+    resetState();
+}
+function handleSubmitEditRow(event) {
+    event.preventDefault();
+    console.log('submitting');
+}
 function handleEditRow(rowId) {
+    if (state.editing) {
+        return;
+    }
+    state.editing = true;
     var row = document.getElementById(rowId);
-    var oldUser = JSON.parse(row.childNodes[1].textContent || '');
-    var form = "\n    <form>\n      <td><input type=\"text\" name=\"phone\" value=\"" + oldUser.phone + "\"></td>\n      <td><input type=\"text\" name=\"department\" value=\"" + oldUser.department + "\"></td>\n      <td><input type=\"text\" name=\"name\" value=\"" + oldUser.name + "\"></td>\n      <td>\n        <button class=\"waves-effect waves-light btn-small\"><i class=\"material-icons\">close</i></button>\n        <button class=\"waves-effect waves-light btn-small\"><i class=\"material-icons\">check</i></button>\n      </td>\n    </form>\n  ";
-    console.log(JSON.parse(row.childNodes[1].textContent || ''));
+    state.currentRow = row;
+    state.currentRowReservedCopy = row.innerHTML;
+    console.log('first child: ');
+    console.log(row.firstChild);
+    // state.currentRowOldData = JSON.parse(row.firstChild) as TPhone;
+    console.log(row);
+    var phoneData = JSON.parse(row.childNodes[1].textContent || '');
+    var form = "\n    <form id=\"phone-edit\" onsubmit=\"handleSubmitEditRow()\">\n      <div class=\"col s2\">\n        <input type=\"text\" name=\"phone\" value=\"" + phoneData.phone + "\" />\n      </div>\n      <div class=\"col s2\">\n        <input type=\"text\" name=\"department\" value=\"" + phoneData.department + "\">\n      </div>\n      <div class=\"col s4\">\n        <input type=\"text\" name=\"name\" value=\"" + phoneData.name + "\" />\n      </div>\n      <div class=\"col s1\">\n        <span>\n          <button class=\"waves-light btn-small\" onclick=\"handleCancelEditRow()\">\n              <i class=\"material-icons\">close</i>\n          </button>\n      </div>\n      <div class=\"col s1\">\n          <button form=\"phone-edit\" value=\"submit\" class=\"waves-light btn-small\"><i class=\"material-icons\">check</i></button>\n        </span>\n      </div>\n    </form>\n  ";
     row.innerHTML = form;
 }
 var getPhonesTable = function (phones) {
-    return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Summary</td>\n        <th>\u0422\u0435\u043B\u0435\u0444\u043E\u043D</td>\n        <th>\u0412\u0456\u0434\u0434\u0456\u043B</td>\n        <th>\u0406\u043C'\u044F</td>\n        <th></th>\n      </tr>\n    </thead>\n    <tbody>\n      " + phones.reduce(function (acc, phone) {
-        return (acc += "\n      <tr id=\"" + phone.id + "\">\n        <td hidden id=\"" + phone.id + "_\">" + JSON.stringify(phone) + "</td>\n        <td>" + phone.phone + "</td>\n        <td>" + phone.department + "</td>\n        <td>" + phone.name + "</td>\n        <td>\n          <button\n            class=\"waves-effect\n            waves-light\n            btn-small\"\n            onclick=\"handleEditRow('" + phone.id + "')\"\n            >\n              \u0420\u0435\u0434\u0430\u0433\u0443\u0432\u0430\u0442\u0438\n          </button></td>\n      </tr>\n      ");
-    }, '') + "\n    </tbody>\n  </table>\n  ";
+    return "\n    <div class=\"row\">\n      <div hidden>Summary</div>\n      <div class=\"col s2\"><h6>\u0422\u0435\u043B\u0435\u0444\u043E\u043D</h6></div>\n      <div class=\"col s2\"><h6>\u0412\u0456\u0434\u0434\u0456\u043B</h6></div>\n      <div class=\"col s4\"><h6>\u0406\u043C'\u044F</h6></div>\n      <div class=\"col s1\"><h6></h6></div>\n      <div class=\"col s1\"><h6></h6></div>\n    </div>\n    " + phones.reduce(function (acc, phone) {
+        return (acc += "\n    <div class=\"row\" id=\"" + phone.id + "\">\n      <div hidden id=\"" + phone.id + "_\">" + JSON.stringify(phone) + "</div>\n      <div class=\"col s2\">" + phone.phone + "</div>\n      <div class=\"col s2\">" + phone.department + "</div>\n      <div class=\"col s4\">" + phone.name + "</div>\n      <div class=\"col s1\">\n        <button class=\"waves-light btn-small\" onclick=\"handleEditRow('" + phone.id + "')\">\n           <i class=\"material-icons\">edit</i> \n        </button>\n      </div>\n      <div class=\"col s1\">\n        <button class=\"waves-light btn-small\"><i class=\"material-icons\">delete</i></button>\n       </div>\n    </div>\n    ");
+    }, '') + "\n  ";
 };
 var getBirthdaysTable = function (birthdays) {
     return "\n  <table>\n    <thead>\n      <tr>\n        <th hidden>Id</td>\n        <th>\u0406\u043C'\u044F</td>\n        <th>\u0414\u0435\u043D\u044C</td>\n        <th>\u041C\u0456\u0441\u044F\u0446\u044C</td>\n        <th>\u0420\u0456\u043A</td>\n      </tr>\n    </thead>\n    <tbody>\n      " + birthdays.reduce(function (acc, birthday) {
@@ -84,6 +116,7 @@ var createDataSelector = function (usersButton, phonesButton, birthdaysButton) {
                 return;
             }
             this.value = value;
+            resetState();
             switch (value) {
                 case 'phones':
                     usersButton.checked = false;

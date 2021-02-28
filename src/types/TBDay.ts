@@ -3,9 +3,9 @@
  */
 export type TBDay = {
   id: string;
+  name: string;
   date: string;
   day: number;
   month: number;
   year: number;
-  name: string;
 };
