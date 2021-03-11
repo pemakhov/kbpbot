@@ -39,13 +39,13 @@ var state = {
     editing: false,
     currentRow: null,
     currentRowReservedCopy: '',
-    currentRowOldData: null
+    currentRowOldObject: null
 };
 var resetState = function () {
     state.editing = false;
     state.currentRow = null;
     state.currentRowReservedCopy = '';
-    state.currentRowOldData = null;
+    state.currentRowOldObject = null;
 };
 var mainBlock = document.getElementById('body');
 var fetchData = function (type) { return __awaiter(_this, void 0, void 0, function () {
@@ -65,13 +65,12 @@ var fetchData = function (type) { return __awaiter(_this, void 0, void 0, functi
     });
 }); };
 function handleCancelEditRow() {
-    console.log(state);
     if (state.currentRow !== null) {
         state.currentRow.innerHTML = state.currentRowReservedCopy;
     }
     resetState();
 }
-function handleSubmitEditRow(event) {
+function handleSubmitEditing(event) {
     event.preventDefault();
     console.log('submitting');
 }
@@ -81,14 +80,11 @@ function handleEditRow(rowId) {
     }
     state.editing = true;
     var row = document.getElementById(rowId);
+    var phoneData = JSON.parse(row.childNodes[1].textContent || '');
     state.currentRow = row;
     state.currentRowReservedCopy = row.innerHTML;
-    console.log('first child: ');
-    console.log(row.firstChild);
-    // state.currentRowOldData = JSON.parse(row.firstChild) as TPhone;
-    console.log(row);
-    var phoneData = JSON.parse(row.childNodes[1].textContent || '');
-    var form = "\n    <form id=\"phone-edit\" onsubmit=\"handleSubmitEditRow()\">\n      <div class=\"col s2\">\n        <input type=\"text\" name=\"phone\" value=\"" + phoneData.phone + "\" />\n      </div>\n      <div class=\"col s2\">\n        <input type=\"text\" name=\"department\" value=\"" + phoneData.department + "\">\n      </div>\n      <div class=\"col s4\">\n        <input type=\"text\" name=\"name\" value=\"" + phoneData.name + "\" />\n      </div>\n      <div class=\"col s1\">\n        <span>\n          <button class=\"waves-light btn-small\" onclick=\"handleCancelEditRow()\">\n              <i class=\"material-icons\">close</i>\n          </button>\n      </div>\n      <div class=\"col s1\">\n          <button form=\"phone-edit\" value=\"submit\" class=\"waves-light btn-small\"><i class=\"material-icons\">check</i></button>\n        </span>\n      </div>\n    </form>\n  ";
+    state.currentRowOldObject = phoneData;
+    var form = "\n    <form onsubmit=\"handleSubmitEditing()\">\n      <div class=\"col s2\">\n        <input type=\"text\" name=\"phone\" value=\"" + phoneData.phone + "\" />\n      </div>\n      <div class=\"col s2\">\n        <input type=\"text\" name=\"department\" value=\"" + phoneData.department + "\">\n      </div>\n      <div class=\"col s4\">\n        <input type=\"text\" name=\"name\" value=\"" + phoneData.name + "\" />\n      </div>\n      <div class=\"col s1\">\n        <button class=\"waves-light btn-small\" onclick=\"handleCancelEditRow()\">\n          <i class=\"material-icons\">close</i>\n        </button>\n      </div>\n      <div class=\"col s1\">\n        <button type=\"submit\" class=\"waves-light btn-small\">\n          <i class=\"material-icons\">check</i>\n        </button>\n      </div>\n    </form>\n  ";
     row.innerHTML = form;
 }
 var getPhonesTable = function (phones) {

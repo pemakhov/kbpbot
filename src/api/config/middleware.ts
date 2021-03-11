@@ -1,15 +1,13 @@
 import express, { Application } from 'express';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 
 function init(app: Application): void {
   app.use(
-    bodyParser.urlencoded({
+    express.urlencoded({
       extended: true,
     })
   );
-  app.use(bodyParser.json());
   // performs express use json from the body
   app.use(express.json());
   // parse Cookie header and populate req.cookies with an object keyed by the cookie names.

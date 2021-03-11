@@ -28,19 +28,19 @@ const state: {
   editing: boolean;
   currentRow: HTMLElement | null;
   currentRowReservedCopy: string;
-  currentRowOldData: TPhone | TBDay | TUser | null;
+  currentRowOldObject: TPhone | TBDay | TUser | null;
 } = {
   editing: false,
   currentRow: null,
   currentRowReservedCopy: '',
-  currentRowOldData: null,
+  currentRowOldObject: null,
 };
 
 const resetState = () => {
   state.editing = false;
   state.currentRow = null;
   state.currentRowReservedCopy = '';
-  state.currentRowOldData = null;
+  state.currentRowOldObject = null;
 };
 
 const mainBlock = <HTMLElement>document.getElementById('body');
@@ -56,7 +56,6 @@ const fetchData = async (type: string): Promise<unknown[]> => {
 };
 
 function handleCancelEditRow() {
-  console.log(state);
   if (state.currentRow !== null) {
     state.currentRow.innerHTML = state.currentRowReservedCopy;
   }
@@ -64,7 +63,7 @@ function handleCancelEditRow() {
   resetState();
 }
 
-function handleSubmitEditRow(event: Event) {
+function handleSubmitEditing(event: Event) {
   event.preventDefault();
   console.log('submitting');
 }
@@ -76,17 +75,14 @@ function handleEditRow(rowId: string) {
   state.editing = true;
 
   const row = <HTMLElement>document.getElementById(rowId);
+  const phoneData: TPhone = JSON.parse(row.childNodes[1].textContent || '');
 
   state.currentRow = row;
   state.currentRowReservedCopy = row.innerHTML;
-  console.log('first child: ');
-  console.log(row.firstChild);
-  // state.currentRowOldData = JSON.parse(row.firstChild) as TPhone;
-  console.log(row);
+  state.currentRowOldObject = phoneData;
 
-  const phoneData: TPhone = JSON.parse(row.childNodes[1].textContent || '');
   const form = `
-    <form id="phone-edit" onsubmit="handleSubmitEditRow()">
+    <form onsubmit="handleSubmitEditing()">
       <div class="col s2">
         <input type="text" name="phone" value="${phoneData.phone}" />
       </div>
@@ -97,14 +93,14 @@ function handleEditRow(rowId: string) {
         <input type="text" name="name" value="${phoneData.name}" />
       </div>
       <div class="col s1">
-        <span>
-          <button class="waves-light btn-small" onclick="handleCancelEditRow()">
-              <i class="material-icons">close</i>
-          </button>
+        <button class="waves-light btn-small" onclick="handleCancelEditRow()">
+          <i class="material-icons">close</i>
+        </button>
       </div>
       <div class="col s1">
-          <button form="phone-edit" value="submit" class="waves-light btn-small"><i class="material-icons">check</i></button>
-        </span>
+        <button type="submit" class="waves-light btn-small">
+          <i class="material-icons">check</i>
+        </button>
       </div>
     </form>
   `;
