@@ -4,17 +4,18 @@ import UsersRouter from '../components/users/router';
 import PhonesRouter from '../components/phones/router';
 import BirthdaysRouter from '../components/birthdays/router';
 import Auth from '../components/auth';
+import path from 'path';
 
 function init(app: Application): void {
-  app.use('/auth', AuthRouter.router);
+  app.use('/api/auth', AuthRouter.router);
 
-  app.use('/users', UsersRouter.router);
+  app.use('/api/users', UsersRouter.router);
 
-  app.use('/birthdays', BirthdaysRouter.router);
+  app.use('/api/birthdays', BirthdaysRouter.router);
 
-  app.use('/phones', PhonesRouter.router);
+  app.use('/api/phones', PhonesRouter.router);
 
-  app.get('/', (req, res) => res.render('home', { userName: req.body.userName }));
+  app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../../../../', 'front/build', 'index.html')));
 
   app.post('/', Auth.authenticate, (req, res) => {
     const { userName } = req.body;

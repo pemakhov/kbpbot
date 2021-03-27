@@ -7,6 +7,7 @@
     "build": "rimraf ./build && tsc",
     "start:dev": "nodemon src/index.ts --ignore assets/",
     "start": "npm run build && node build/index.js",
+    "front:build": "npx webpack --config webpack.common.js",
     "test": "mocha --exit -r ts-node/register 'src/tests/**/*.ts' || true"
   },
   "husky": {
