@@ -7,9 +7,7 @@ router.get('/login', (req, res) => {
   return res.render('login', { hideLogin: true });
 });
 
-router.get('/test', (req, res) => {
-  return res.render('login');
-});
+router.get('/me', AuthModule.authenticate, AuthModule.getMe);
 
 router.post('/code-request', AuthModule.handleCodeRequest);
 

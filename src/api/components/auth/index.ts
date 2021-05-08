@@ -101,13 +101,13 @@ async function processLoginWithCode(req: Request, res: Response): Promise<void> 
 }
 
 function authenticate(req: Request, res: Response, next: NextFunction): void {
-  const authorization: string = req.headers['authorization'] as string;
-
-  if (authorization === undefined) return next();
-
-  const accessToken: string = authorization.split(' ')[1];
-
   try {
+    const authorization: string = req.headers['authorization'] as string;
+
+    if (authorization === undefined) throw new ForbiddenError();
+
+    const accessToken: string = authorization.split(' ')[1];
+
     jwt.verify(accessToken, constants.ACCESS_TOKEN_SECRET, (error, decoded) => {
       if (error) {
         throw error;
@@ -119,11 +119,7 @@ function authenticate(req: Request, res: Response, next: NextFunction): void {
       next();
     });
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      const refreshAddress = req.path;
-      res.status(StatusCodes.FORBIDDEN).render('refresh', { refreshAddress });
-    }
-    next();
+    res.status(StatusCodes.FORBIDDEN).json({ error });
   }
 }
 
@@ -156,9 +152,15 @@ function refresh(req: Request, res: Response): void {
   );
 }
 
+function getMe(req: Request, res: Response): void {
+  const { userName } = req.body;
+  res.status(200).json({ userName });
+}
+
 export default {
   authenticate,
   handleCodeRequest,
   processLoginWithCode,
   refresh,
+  getMe,
 };
