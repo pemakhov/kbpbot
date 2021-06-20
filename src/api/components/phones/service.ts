@@ -1,5 +1,4 @@
-import { inMemoryDb } from '../../../data-manager/in-memory-database';
-import { fillIn } from '../../../data-manager/in-memory-database';
+import { inMemoryDb, fillIn } from '../../../data-manager/in-memory-database';
 import redisDb from '../../../data-manager/redis-db';
 import { TPhone } from '../../../types/TPhone';
 
@@ -23,7 +22,22 @@ async function update(phone: TPhone): Promise<{ error: Error | null; result: boo
   }
 }
 
+async function deleteById(id: string): Promise<{ error: Error | null; deleted: number }> {
+  try {
+    const result: number = await redisDb.deletePhoneById(id);
+    inMemoryDb.phone.clear();
+    const phones = await redisDb.getPhones();
+    fillIn(undefined, phones, undefined);
+
+    return { error: null, deleted: result };
+  } catch (error) {
+    console.error(error.message);
+    return { error, deleted: 0 };
+  }
+}
+
 export default {
   findAll,
   update,
+  deleteById,
 };

@@ -39,9 +39,8 @@ const parsePhoneInput = (input: string): TPhone | never => {
     'Department name is too short or too long',
     'Назва відділу задовга або закоротка'
   );
-  console.log({ id: `${phone}${name}`, phone, name, department });
 
-  return { id: `${phone}${name}`, phone, name, department };
+  return { id: `${phone}${name.split(' ').join('')}`, phone, name, department };
 };
 
 const parseBdInput = (input: string): TBDay | never => {
@@ -75,7 +74,7 @@ const parseBdInput = (input: string): TBDay | never => {
 
   const [day, month, year] = dateInput.split('.').map((x) => parseInt(x));
   const date = `${year}-${month}-${day}`;
-  return { id: `${date}${name}`, date, day, month, year, name };
+  return { id: `${date}${name.split(' ').join('')}`, date, day, month, year, name };
 };
 
 export default {

@@ -3,10 +3,6 @@ import AuthModule from './';
 
 const router = Router();
 
-router.get('/login', (req, res) => {
-  return res.render('login', { hideLogin: true });
-});
-
 router.get('/me', AuthModule.authenticate, AuthModule.getMe);
 
 router.post('/code-request', AuthModule.handleCodeRequest);

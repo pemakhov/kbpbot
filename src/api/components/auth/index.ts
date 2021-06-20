@@ -30,9 +30,7 @@ const getTokens = async (user: TUser) => {
     });
   });
 
-  const tokens = { accessToken, refreshToken };
-
-  return tokens;
+  return { accessToken, refreshToken };
 };
 
 function handleCodeRequest(req: Request, res: Response): void {
@@ -44,7 +42,8 @@ function handleCodeRequest(req: Request, res: Response): void {
     const user: TUser | undefined = UserService.getByUsername(searchableUsername);
 
     if (!user) throw new NotFoundError('User not found');
-    if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
+    //TODO: set admins to be admins and uncomment following row
+    // if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
 
     const code: string = Service.getConfirmCode(CONFIRM_CODE_LENGTH);
 
@@ -83,7 +82,8 @@ async function processLoginWithCode(req: Request, res: Response): Promise<void> 
     const user: TUser | undefined = UserService.getById(userId);
 
     if (!user) throw new NotFoundError('User not found');
-    if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
+    //TODO: set admins to be admins and uncomment following row
+    // if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
 
     res.status(200).json(await getTokens(user));
   } catch (error) {
@@ -110,6 +110,7 @@ function authenticate(req: Request, res: Response, next: NextFunction): void {
 
     jwt.verify(accessToken, constants.ACCESS_TOKEN_SECRET, (error, decoded) => {
       if (error) {
+        console.log(error.message);
         throw error;
       }
 
