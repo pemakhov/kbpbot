@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Service from './service';
+import constants from '../../constants';
 
 function findAll(req: Request, res: Response): void {
   res.status(200).json(Service.findAll());
@@ -7,9 +8,15 @@ function findAll(req: Request, res: Response): void {
 
 function update(req: Request, res: Response): void {
   const { newUser } = req.body;
+  const { id, isAdmin } = newUser;
 
   if (!newUser) {
     res.status(400);
+    return;
+  }
+
+  if (!isAdmin && id === constants.ADMIN_TELEGRAM_ID) {
+    res.status(400).json({ error: 'This user is special' });
     return;
   }
 
