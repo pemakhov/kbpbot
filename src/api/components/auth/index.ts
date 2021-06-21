@@ -42,8 +42,7 @@ function handleCodeRequest(req: Request, res: Response): void {
     const user: TUser | undefined = UserService.getByUsername(searchableUsername);
 
     if (!user) throw new NotFoundError('User not found');
-    //TODO: set admins to be admins and uncomment following row
-    // if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
+    if (!user.isAdmin) throw new ForbiddenError('Forbidden. User is not admin');
 
     const code: string = Service.getConfirmCode(CONFIRM_CODE_LENGTH);
 
