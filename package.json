@@ -4,10 +4,9 @@
   "description": "A telegram bot, serving as a phone and birthdays book",
   "main": "index.js",
   "scripts": {
-    "build": "rimraf ./build && tsc",
+    "build": "rimraf ./distr && tsc",
     "start:dev": "nodemon src/index.ts --ignore assets/",
-    "start": "npm run build && node build/index.js",
-    "front:build": "npx webpack --config webpack.common.js",
+    "start": "npm run build && node distr/index.js",
     "test": "mocha --exit -r ts-node/register 'src/tests/**/*.ts' || true"
   },
   "husky": {

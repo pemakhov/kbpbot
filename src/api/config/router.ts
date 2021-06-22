@@ -15,7 +15,7 @@ function init(app: Application): void {
 
   app.use('/api/phones', PhonesRouter.router);
 
-  app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../../../../', 'front/build', 'index.html')));
+  app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../../../', 'build/', 'index.html')));
 
   app.post('/', Auth.authenticate, (req, res) => {
     const { userName } = req.body;
