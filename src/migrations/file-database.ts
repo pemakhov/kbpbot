@@ -123,9 +123,9 @@ const readUsers = (): Map<number, TOldUser> => {
 };
 
 export default {
-  readPhones,
-  readBDays,
   write,
   writeUser,
+  readPhones,
+  readBDays,
   readUsers,
 };
