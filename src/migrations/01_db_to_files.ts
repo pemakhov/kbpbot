@@ -4,11 +4,10 @@ import redisDb from '../data-manager/redis-db';
 import { TPhone } from '../types/TPhone';
 import { TBDay } from '../types/TBDay';
 import { TUser } from '../types/TUser';
-import { exit } from 'node:process';
 
-const PHONES_PATH = path.join(__dirname, '../../assets/phones1.json');
-const BIRTHDAYS_PATH = path.join(__dirname, '../../assets/birthdays1.json');
-const USERS_DATA_FILE = `${__dirname}/../../assets/users1.json`;
+const PHONES_PATH = path.join(__dirname, '../../assets/phones.json');
+const BIRTHDAYS_PATH = path.join(__dirname, '../../assets/birthdays.json');
+const USERS_DATA_FILE = `${__dirname}/../../assets/users.json`;
 
 const writeData = async () => {
   const phones: TPhone[] = await redisDb.getPhones();
@@ -27,4 +26,4 @@ const writeData = async () => {
 };
 
 writeData();
-exit(0);
+process.exit(0);
