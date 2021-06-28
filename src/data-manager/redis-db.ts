@@ -4,6 +4,10 @@ import { TPhone } from '../types/TPhone';
 import { TUser } from '../types/TUser';
 import { promisify } from 'util';
 
+const USERS = 'users';
+const PHONES = 'phones';
+const BIRTHDAYS = 'birthdays';
+
 const client = redis.createClient();
 
 const hsetAsync = promisify(client.HSET).bind(client);
@@ -16,10 +20,10 @@ client.on('error', (error) => {
 
 /* User manipulating methods */
 
-const saveUser = (user: TUser): Promise<number> => hsetAsync(['users', user.id.toString(), JSON.stringify(user)]);
+const saveUser = (user: TUser): Promise<number> => hsetAsync([USERS, user.id.toString(), JSON.stringify(user)]);
 
 const getUserById = async (id: number): Promise<TUser | null> => {
-  const result = await hgetAsync('users', id + '');
+  const result = await hgetAsync(USERS, id + '');
 
   return result ? JSON.parse(result) : null;
 };
@@ -43,14 +47,14 @@ const makeUserAdmin = async (id: number): Promise<boolean> => {
 };
 
 const getUsers = async (): Promise<TUser[]> => {
-  const result = await hgetallAsync('users');
+  const result = await hgetallAsync(USERS);
 
   return result ? Object.values(result).map((user) => JSON.parse(user as string)) : [];
 };
 
 const deleteUserById = async (id: number): Promise<number> => {
   return new Promise((resolve, reject) => {
-    client.HDEL('users', id + '', (error, result) => {
+    client.HDEL(USERS, id + '', (error, result) => {
       if (error) {
         reject(error);
         return;
@@ -61,25 +65,29 @@ const deleteUserById = async (id: number): Promise<number> => {
   });
 };
 
+const deleteUsersCollection = (): boolean => {
+  return client.del(USERS);
+};
+
 /* Phone manipulating methods */
 
-const savePhone = async (phone: TPhone): Promise<number> => hsetAsync(['phones', phone.id, JSON.stringify(phone)]);
+const savePhone = async (phone: TPhone): Promise<number> => hsetAsync([PHONES, phone.id, JSON.stringify(phone)]);
 
 const getPhoneById = async (id: string): Promise<TPhone | null> => {
-  const result = await hgetAsync('phones', id);
+  const result = await hgetAsync(PHONES, id);
 
   return result ? JSON.parse(result) : null;
 };
 
 const getPhones = async (): Promise<TPhone[]> => {
-  const result = await hgetallAsync('phones');
+  const result = await hgetallAsync(PHONES);
 
   return result ? Object.values(result).map((phone) => JSON.parse(phone as string)) : [];
 };
 
 const deletePhoneById = async (id: string): Promise<number> => {
   return new Promise((resolve, reject) => {
-    client.HDEL('phones', id, (error, result) => {
+    client.HDEL(PHONES, id, (error, result) => {
       if (error) {
         reject(error);
         return;
@@ -90,25 +98,29 @@ const deletePhoneById = async (id: string): Promise<number> => {
   });
 };
 
+const deletePhonesCollection = (): boolean => {
+  return client.del(PHONES);
+};
+
 /* Birthday manipulating methods */
 
-const saveBirthday = async (bDay: TBDay): Promise<number> => hsetAsync(['birthdays', bDay.id, JSON.stringify(bDay)]);
+const saveBirthday = async (bDay: TBDay): Promise<number> => hsetAsync([BIRTHDAYS, bDay.id, JSON.stringify(bDay)]);
 
 const getBirthdayById = async (id: string): Promise<TBDay | null> => {
-  const result = await hgetAsync('birthdays', id);
+  const result = await hgetAsync(BIRTHDAYS, id);
 
   return result ? JSON.parse(result) : null;
 };
 
 const getBirthdays = async (): Promise<TBDay[]> => {
-  const result = await hgetallAsync('birthdays');
+  const result = await hgetallAsync(BIRTHDAYS);
 
   return result ? Object.values(result).map((bDay) => JSON.parse(bDay as string)) : [];
 };
 
 const deleteBirthdayById = async (id: string): Promise<number> => {
   return new Promise((resolve, reject) => {
-    client.HDEL('birthdays', id, (error, result) => {
+    client.HDEL(BIRTHDAYS, id, (error, result) => {
       if (error) {
         reject(error);
         return;
@@ -117,6 +129,10 @@ const deleteBirthdayById = async (id: string): Promise<number> => {
       return;
     });
   });
+};
+
+const deleteBirthdaysCollection = (): boolean => {
+  return client.del(BIRTHDAYS);
 };
 
 export default {
@@ -125,12 +141,15 @@ export default {
   getUsers,
   makeUserAdmin,
   deleteUserById,
+  deleteUsersCollection,
   savePhone,
   getPhoneById,
   getPhones,
+  deletePhonesCollection,
   deletePhoneById,
   saveBirthday,
   getBirthdayById,
   getBirthdays,
   deleteBirthdayById,
+  deleteBirthdaysCollection,
 };
