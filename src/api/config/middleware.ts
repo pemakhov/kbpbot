@@ -15,7 +15,7 @@ function init(app: Application): void {
 
   app.set('env', process.env.NODE_ENV || 'development');
 
-  app.use(express.static(path.join(__dirname, '../../../', 'build/')));
+  app.use(express.static(path.join(__dirname, '../../../../front', 'build/')));
 
   app.set('view engine', 'pug');
 
