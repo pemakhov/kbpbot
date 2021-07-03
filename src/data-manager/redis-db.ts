@@ -115,7 +115,19 @@ const getBirthdayById = async (id: string): Promise<TBDay | null> => {
 const getBirthdays = async (): Promise<TBDay[]> => {
   const result = await hgetallAsync(BIRTHDAYS);
 
-  return result ? Object.values(result).map((bDay) => JSON.parse(bDay as string)) : [];
+  return result
+    ? Object.values(result)
+        .map((bDay) => JSON.parse(bDay as string))
+        .sort((a: TBDay, b: TBDay): number => {
+          if (a.month < b.month) return -1;
+          if (a.month > b.month) return 1;
+          if (a.day < b.day) return -1;
+          if (a.day > b.day) return 1;
+          if (a.year < b.year) return -1;
+          if (a.year > b.year) return 1;
+          return 0;
+        })
+    : [];
 };
 
 const deleteBirthdayById = async (id: string): Promise<number> => {
