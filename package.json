@@ -4,7 +4,7 @@
   "description": "A telegram bot, serving as a phone and birthdays book",
   "main": "index.js",
   "scripts": {
-    "build": "rimraf ./distr && tsc",
+    "build": "rimraf ./distr && tsc && cp .env ./distr/",
     "start:dev": "nodemon src/index.ts --ignore assets/",
     "start": "npm run build && node distr/index.js",
     "test": "mocha --exit -r ts-node/register 'src/tests/**/*.ts' || true"
