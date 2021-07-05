@@ -284,8 +284,8 @@ function restBd(bot: TelegramBot, command: string, inMemoryDb: TInMemoryDatabase
       const result = inMemoryDb.birthday
         .all()
         .filter((a) => {
-          const currentMonth = today.getMonth();
-          return a.month > currentMonth || (a.month === currentMonth && a.day >= today.getDay());
+          const currentMonth = today.getMonth() + 1;
+          return a.month > currentMonth || (a.month === currentMonth && a.day >= today.getDate());
         })
         .sort((a, b) => a.month - b.month || a.day - b.day)
         .reduce((acc, row) => `${acc}${row?.day} ${monthsUkrAccusative[(row?.month || 12) - 1]}, ${row?.name}\n`, '');
