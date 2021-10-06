@@ -53,7 +53,9 @@ const readPhones = (path: string, data: Map<string, TOldPhone>): Map<string, TOl
         try {
           return JSON.parse(string);
         } catch (error) {
-          log.error(error.message);
+          let errorMessage = 'Failed to do something exceptional';
+          if (error instanceof Error) errorMessage = error.message;
+          log.error(errorMessage);
         }
       })
       .filter((x) => x)
@@ -78,7 +80,9 @@ const readBDays = (path: string, data: Map<string, TOldBDay>): Map<string, TOldB
         try {
           return JSON.parse(string);
         } catch (error) {
-          log.error(error.message);
+          let errorMessage = 'Failed to do something exceptional';
+          if (error instanceof Error) errorMessage = error.message;
+          log.error(errorMessage);
         }
       })
       .filter((x) => x)
@@ -113,7 +117,9 @@ const readUsers = (): Map<number, TOldUser> => {
         try {
           return JSON.parse(string);
         } catch (error) {
-          log.info(error.message);
+          let errorMessage = 'Failed to do something exceptional';
+          if (error instanceof Error) errorMessage = error.message;
+          log.info(errorMessage);
         }
       })
       .filter((x) => x)
